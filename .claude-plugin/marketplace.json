@@ -1,0 +1,22 @@
+{
+  "name": "lumos-skill-by-shidqi",
+  "owner": {
+    "name": "Shidqi",
+    "email": "shidqiamirulhaq@gmail.com",
+    "url": "https://github.com/shidqi29"
+  },
+  "metadata": {
+    "description": "Lumos Framework skills for Claude Code — responsive layouts in Webflow or vanilla HTML/CSS/JS.",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "lumos",
+      "source": "./plugins/lumos",
+      "description": "Build responsive layouts with the Lumos Framework by Timothy Ricks — in Webflow or in a plain HTML/CSS/JS project built from scratch. Ships a generatable foundation stylesheet for vanilla projects.",
+      "version": "1.0.0",
+      "keywords": ["lumos", "webflow", "css", "responsive", "frontend", "layout"],
+      "category": "frontend"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "name": "lumos",
+  "version": "1.0.0",
+  "description": "Build responsive layouts with the Lumos Framework by Timothy Ricks — in Webflow or in a plain HTML/CSS/JS project built from scratch.",
+  "author": {
+    "name": "Shidqi",
+    "email": "shidqiamirulhaq@gmail.com",
+    "url": "https://github.com/shidqi29"
+  },
+  "homepage": "https://github.com/shidqi29/lumos-skill",
+  "repository": "https://github.com/shidqi29/lumos-skill",
+  "license": "MIT",
+  "keywords": ["lumos", "webflow", "css", "responsive", "frontend", "layout", "breakpointless"],
+  "category": "frontend"
+}
