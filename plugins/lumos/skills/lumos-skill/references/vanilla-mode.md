@@ -37,7 +37,7 @@ Two equally valid ways to place component code:
     <!-- Optional shared styles AFTER the foundation -->
     <link rel="stylesheet" href="css/styles.css" />
   </head>
-  <body>
+  <body class="page_wrap">
     <!-- Sections go here. Apply a theme class to each section. -->
     <section class="hero_wrap u-section u-theme-light">
       <style>
@@ -64,6 +64,16 @@ Two equally valid ways to place component code:
   </body>
 </html>
 ```
+
+## The page wrapper (`page_wrap`)
+
+Webflow can't paste a `<body>` tag — the HTML-to-Webflow import tool wraps the page in a `<div>` that inherits the body's class, so anything styled on the bare `body` selector is lost. Because of that, **all body-level styling lives on the `.page_wrap` class** in the foundation, never on `body`:
+
+- base font, color, and background
+- `min-height: 100vh` so the background fills the viewport
+- the `container-name: threshold-large threshold-medium threshold-small` + `container-type: inline-size` that drive the whole responsive system
+
+So wrap every section in a single `<body class="page_wrap">`. On import it becomes `<div class="page_wrap">` and every style — including the threshold containers — carries over unchanged. Never add a `body { … }` rule; put page-level styles on `.page_wrap`.
 
 ## What differs from Webflow mode
 
@@ -108,4 +118,4 @@ The foundation is assembled from three layers with different provenance:
 
 For 1:1 parity with a specific Webflow project, replace layers 2 and 3 with that project's exported **Variables** (`:root` custom properties) and **utility-class CSS**. Because the variable names match, this is a drop-in swap — paste them over sections 2 and 3 and component output is unaffected.
 
-Responsive behavior runs entirely through the `threshold-*` system: the utilities (`u-grid-above`/`u-grid-below`, `u-order-unset-*`, `u-all-unset-*`) plus named `@container threshold-large|medium|small` queries, at the global style's own `62 / 48 / 30em` breakpoints, scoped to the `body` container. (The older `--_responsive---*` / `--flex-*` keyword-variable system has been removed from the foundation.)
+Responsive behavior runs entirely through the `threshold-*` system: the utilities (`u-grid-above`/`u-grid-below`, `u-order-unset-*`, `u-all-unset-*`) plus named `@container threshold-large|medium|small` queries, at the global style's own `62 / 48 / 30em` breakpoints, scoped to the `page_wrap` container (not `body` — see above). (The older `--_responsive---*` / `--flex-*` keyword-variable system has been removed from the foundation.)

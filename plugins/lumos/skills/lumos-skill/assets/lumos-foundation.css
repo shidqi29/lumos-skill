@@ -34,6 +34,16 @@ html {
 
 body {
   margin: 0;
+}
+
+/* Page wrapper. Webflow can't paste a <body>, so the HTML-to-Webflow import tool
+   wraps everything in a <div> that inherits the body's class — any style on the
+   bare `body` selector is therefore lost on import. Put every body-level style on
+   this class instead, and emit <body class="page_wrap"> (it becomes
+   <div class="page_wrap"> after import). It also hosts the threshold-* responsive
+   containers, so they survive too. */
+.page_wrap {
+  min-height: 100vh;
   background-color: var(--_theme---background);
   font-family: var(--_text-style---font-family);
   color: var(--_theme---text);
@@ -45,6 +55,8 @@ body {
   text-wrap: var(--_text-style---text-wrap);
   -webkit-font-smoothing: antialiased;
   --_column-count---value: 12;
+  container-name: threshold-large threshold-medium threshold-small;
+  container-type: inline-size;
 }
 
 button {
@@ -1286,10 +1298,9 @@ label:has(input:focus-visible) [data-outline] {
    ------------------------------------------------------------------------- */
 
 /* --- threshold-* responsive utilities (from the global style) ------------ */
-body {
-  container-name: threshold-large threshold-medium threshold-small;
-  container-type: inline-size;
-}
+/* The threshold-* containers are declared on .page_wrap (see the page wrapper near
+   the top of section 1), NOT on `body` — Webflow can't paste a <body>, so anchoring
+   them to the wrapper class keeps responsive working after import. */
 
 /* Base grid for u-grid-above / u-grid-below. The utility itself provides the grid,
    gutters, and column direction — components only set the column count (and any gap

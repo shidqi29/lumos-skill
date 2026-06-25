@@ -35,7 +35,8 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
 
 - Vanilla HTML, CSS, JS only
 - Only write CSS for component classes and container queries — never for `u-*` utilities
-- No CSS resets, `:root` definitions, `body` styles, or utility redefinitions
+- No CSS resets, `:root` definitions, `body`/`page_wrap` styles, or utility redefinitions
+- **Never style the bare `body` selector.** Webflow can't paste a `<body>`, so the import tool turns the body's class into a wrapper `<div>` — only class-based styles survive. All body-level styles (font, color, background, the threshold containers) live on the `page_wrap` wrapper class in the foundation. In vanilla output wrap the page in `<body class="page_wrap">` (see `references/vanilla-mode.md`)
 - No `px` — default to `rem`. Text `max-width` uses `ch`, set via `data-number="N"` (see Typography). Container query breakpoints use `em`
 - Class-only selectors — no tag names, IDs, data attributes, or descendant selectors
 - No fallback values in `var()`
@@ -266,11 +267,11 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
 
 ### Responsive
 
-Responsive uses the **threshold + utility** approach — never `@media`, and no `--_responsive---*` / `--flex-*` keyword-variable math. Responsive switches react to **page width** via named container queries declared on `body`.
+Responsive uses the **threshold + utility** approach — never `@media`, and no `--_responsive---*` / `--flex-*` keyword-variable math. Responsive switches react to **page width** via named container queries declared on the `page_wrap` wrapper.
 
 #### Threshold containers
 
-Declared on `body`: `threshold-large` (62em), `threshold-medium` (48em), `threshold-small` (30em). Query them by name to react to page width.
+Declared on `page_wrap` (the single page wrapper, not `body`): `threshold-large` (62em), `threshold-medium` (48em), `threshold-small` (30em). Query them by name to react to page width.
 
 #### Grid → stack (the common case)
 
@@ -318,7 +319,7 @@ For flex-direction switches, alignment changes, a different column count, or a c
 ```
 
 - Breakpoints always in `em`: large `62em`, medium `48em`, small `30em`
-- Threshold queries react to **page** width (the `body` container). To react to a component's **own** width instead, query the nearest `u-container` (`container-type: inline-size`) with an unnamed `@container (width < Xem)` — affects its children only
+- Threshold queries react to **page** width (the `page_wrap` container). To react to a component's **own** width instead, query the nearest `u-container` (`container-type: inline-size`) with an unnamed `@container (width < Xem)` — affects its children only
 
 ### Trigger & State System
 
