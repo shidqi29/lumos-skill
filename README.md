@@ -91,7 +91,9 @@ lumos-skill/
 │           └── lumos-skill/          # the skill itself
 │               ├── SKILL.md          # all the Lumos rules & conventions
 │               ├── assets/lumos-foundation.css   # generatable foundation for vanilla mode
-│               └── references/vanilla-mode.md     # full-page guide for from-scratch builds
+│               └── references/
+│                   ├── vanilla-mode.md            # full-page guide for from-scratch builds
+│                   └── webflow-variable-naming.md # naming so vanilla CSS imports as Webflow Variables
 ├── .gitignore
 └── README.md
 ```

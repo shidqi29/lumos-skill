@@ -25,7 +25,7 @@ In vanilla mode, the rules tagged _(Webflow only)_ are **dropped** — they exis
 - No empty-div `padding: 0` fix (Webflow's default element padding doesn't exist).
 - No reliance on `.w-*` runtime classes.
 
-When generating a full page, see `references/vanilla-mode.md` for the project skeleton, an HTML boilerplate, token customization, and fidelity notes.
+When generating a full page, see `references/vanilla-mode.md` for the project skeleton, an HTML boilerplate, token customization, and fidelity notes. The foundation's variable names follow the Webflow Variables import convention so a vanilla project imports back into Webflow as native variables — keep the names intact and follow `references/webflow-variable-naming.md` when adding or customizing tokens.
 
 ---
 
@@ -108,6 +108,7 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
 ### Class Naming
 
 - Component class first, then utilities: `<h2 class="hero_title u-text-style-h2">`
+- **Treat the utility as a combo class — scope component CSS with it.** When an element has a component class plus a utility class, write its CSS as the combo `.component_class.u-utility-class { }`, never bare `.component_class { }`. The combo (specificity 0,2,0) outranks the utility (0,1,0), so the component's own declarations win while every property it doesn't set still comes from the utility. E.g. `.hero_title.u-text-style-h1 { font-weight: var(--_typography---font--primary-medium); }` keeps all h1 styling but overrides just the weight. Joining with one utility class is enough — it already beats any single-class utility selector regardless of source order. If the element carries several utilities, join with the `u-text-style-*` one
 - Underscores separate parts: `[component]_[type]_[element]`
 - Broadest type first → specific → element: `card_testimonial_title`, `cta_secondary_visual_img`
 - Preferred names: `_title` not `_heading`, `_text` not `_paragraph`, `_img` not `_image`
@@ -200,11 +201,11 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
   .hero_content {
     width: 100%;
   }
-  .hero_title {
+  .hero_title.u-text-style-h2 {
     display: flex;
     margin-bottom: var(--_text-style---margin-bottom);
   }
-  .hero_text {
+  .hero_text.u-text-style-small {
     display: flex;
     margin-bottom: var(--_text-style---margin-bottom);
   }
@@ -214,7 +215,7 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
   <h1 class="hero_title u-text-style-h1"></h1>
   ```
   ```css
-  .hero_title {
+  .hero_title.u-text-style-h1 {
     margin-bottom: var(--_text-style---margin-bottom);
   }
   ```
@@ -475,10 +476,10 @@ This applies everywhere, not just visual compositions.
     .hero_layout.u-grid-above {
       --_column-count---value: 2;
     }
-    .hero_title {
+    .hero_title.u-text-style-h1 {
       margin-bottom: var(--_text-style---margin-bottom);
     }
-    .hero_text {
+    .hero_text.u-text-style-main {
       margin-bottom: var(--_text-style---margin-bottom);
     }
   </style>
@@ -505,6 +506,7 @@ This applies everywhere, not just visual compositions.
 - Fallback values in `var()`
 - `false`/`off` before `true`/`on` in expressions
 - Unscoped combo classes
+- Bare `.component { }` CSS for an element that also has a utility class — scope it as the combo `.component.u-utility` so the component's declarations win over the utility
 - Grid columns with bare `1fr` — always `minmax(0, 1fr)`
 - `display: grid` or layout on `u-container` — use a child `_layout` div
 - Hand-writing `display: grid` / `grid-template-columns` on a `_layout` — use `u-grid-above`/`u-grid-below` and set `--_column-count---value` on the combo class

@@ -44,10 +44,10 @@ Two equally valid ways to place component code:
         .hero_layout.u-grid-above {
           --_column-count---value: 2;
         }
-        .hero_title {
+        .hero_title.u-text-style-h1 {
           margin-bottom: var(--_text-style---margin-bottom);
         }
-        .hero_text {
+        .hero_text.u-text-style-main {
           margin-bottom: var(--_text-style---margin-bottom);
         }
       </style>
@@ -84,6 +84,19 @@ All brand values live in **section 2** of `lumos-foundation.css`. Keep the varia
 - **Type scale** — the `.u-text-style-*` rules use `clamp()` for breakpointless sizing; adjust min/max as needed.
 - **Fonts** — set `--_typography---family--primary` (and load the webfont in `<head>` if it isn't a system font). Weight tokens are `--_typography---font--primary-regular|medium|bold`.
 - **Radii, borders, focus, nav height** — the remaining tokens in section 2.
+
+**Keep the variable names exactly as-is.** They follow the Webflow Variables naming convention, so the next section works.
+
+## Importing back into Webflow (variables)
+
+A vanilla project built this way can be imported into Webflow with the HTML-to-Webflow tool, and its CSS custom properties come across as **native Webflow Variables** — correct collection, folder, variable, and mode — because the foundation's names follow the import convention:
+
+- `--_<collection>---<name>` → a collection variable (`--_theme---background` → collection *theme*, variable *background*)
+- `--` inside the name → a nested folder (`--_theme---button-primary--background` → `button primary/background`)
+- `-` → a space; a name with no leading `_` → the base collection (`--site--gutter`)
+- `.u-<collection-slug>-<mode>` classes (`u-theme-dark`, `u-text-style-h2`) → **variable modes**; defaults come from `:root`/`html`/`body`, and an override only registers if it differs from the base
+
+So: don't rename collections, don't inline hardcoded values where a token exists, and keep applying the `u-theme-*` / `u-text-style-*` mode classes on real elements (a mode class absent from the HTML gets pruned on import). New tokens must use the same naming to import. Full rules and checklist: `references/webflow-variable-naming.md`.
 
 ## Fidelity notes
 
