@@ -16,7 +16,7 @@ This skill works in two modes. Figure out which one applies, then follow the sha
 **Vanilla project (from scratch).** Use when the user asks to build with plain HTML/CSS/JS, "from scratch", a landing page or static site, or a layout "without Webflow" — i.e. there is no existing Lumos project. The foundation does **not** exist yet, so generate it first:
 
 1. Copy `assets/lumos-foundation.css` into the project (e.g. `css/lumos-foundation.css`) and link it once in `<head>` **before** any component styles. It provides the reset, the design tokens (`:root` + `u-theme-*` classes), every `u-*` utility, and the responsive + trigger/state systems the components depend on.
-2. Build components exactly as the shared rules below describe — same class naming, same per-component `<style>`/`<script>`, same techniques. Component code stays identical to Webflow mode.
+2. Build components exactly as the shared rules below describe — identical class naming and techniques — with one change: collect component CSS into `css/styles.css` (linked after the foundation) and component JS into `js/main.js` (loaded once before `</body>`), instead of the inline per-component `<style>`/`<script>` blocks the rules show. The markup and class names are unchanged; only where the CSS and JS live differs. See `references/vanilla-mode.md`.
 3. The token values in the foundation are starting defaults. Point the user to the clearly-marked **section 2** of the file to set brand colors, spacing, type scale, and fonts.
 
 In vanilla mode, the rules tagged _(Webflow only)_ are **dropped** — they exist solely to work around Webflow Designer behavior that isn't present:
@@ -53,6 +53,7 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
     </script>
   </section>
   ```
+  _(Webflow only — in vanilla mode there are no inline `<style>`/`<script>` blocks; component CSS goes in `css/styles.css` and component JS in `js/main.js`. Markup, class names, and JS scoping are unchanged — only the location differs.)_
 - No `::before`/`::after` — use a `<div>` with a class
 - No `<em>` tag for italic — use `font-style: italic` in CSS on a `<span>` with a component class
 - Use `<div>` for text elements, not `<span>` — only use `<span>` inside headings (`<h1>`–`<h6>`) or paragraphs (`<p>`)
@@ -72,20 +73,39 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
 
 ### JavaScript
 
-- Scoped per component with init guard:
-  ```html
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      document.querySelectorAll(".component_wrap").forEach((component) => {
-        if (component.dataset.scriptInitialized) return;
-        component.dataset.scriptInitialized = "true";
-        // component.querySelector(".component_element")
-      });
-    });
-  </script>
+- Wrap each component's logic in a named init function — select the component root with `document.querySelector`, then early-return if it's absent so the function is safe to call on any page:
+  ```js
+  const initHeroWrap = () => {
+    // 1. Select the component root as the scope
+    const wrap = document.querySelector(".hero_wrap");
+    // 2. Early-return validation
+    if (!wrap) return;
+    // 3. Scope every query to the component
+    const button = wrap.querySelector(".hero_button");
+  };
   ```
+  Name it `init` + the component in PascalCase (`.hero_wrap` → `initHeroWrap`). If a component repeats on the page, select all and iterate inside the same function, early-returning when none exist: `const cards = document.querySelectorAll(".card_wrap"); if (!cards.length) return; cards.forEach((wrap) => { /* wrap.querySelector(...) */ });`
+- One entry point: collect every component's init into a single `initFunction()`, called once on `DOMContentLoaded`. Inits that measure layout or play reveal animations go inside `document.fonts.ready.then()` so web fonts load first:
+  ```js
+  const initFunction = () => {
+    initNavWrap();
+    initHeroWrap();
+    initServicesWrap();
+
+    document.fonts.ready.then(() => {
+      initRevealWrap();
+      initWhyWrap();
+    });
+  };
+
+  document.addEventListener("DOMContentLoaded", () => {
+    initFunction();
+  });
+  ```
+  No per-component init guard — each init runs exactly once from the single entry point.
+- **Placement by mode.** _Vanilla_: every init function, `initFunction()`, and the single `DOMContentLoaded` live in `js/main.js`. _Webflow_: each component's inline `<script>` is standalone — it defines its own init function and calls it in its own `DOMContentLoaded` (separate embeds can't share one `initFunction()`). A component that may be placed multiple times in Webflow keeps the `querySelectorAll().forEach()` + `dataset.scriptInitialized` guard instead of a top-level named const, since duplicate embeds would otherwise redeclare it _(Webflow only)_.
 - `const`/`let` only, no `var`. No ALL_CAPS names
-- Target by class or `data-` attribute only — never by `id`. Scope to component: `component.querySelector(...)`. Only use `document.querySelector` to reach outside the component (rare, should be commented)
+- Target by class or `data-` attribute only — never by `id`. Scope every query to the component via `wrap.querySelector(...)`. Use `document.querySelector` only to grab the component root or to reach outside the component (rare, should be commented)
 - Only `.is-active` for toggling state — no `.is-visible`, `.is-open`, etc.
 - JS-appended elements: never hard-code HTML strings. Place a hidden template inside the component wrapped in `.[component]_hidden.u-display-none`. JS clones from the template:
   ```html
@@ -96,10 +116,10 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
   </div>
   ```
   ```javascript
-  const template = component.querySelector(".tabs_hidden .tabs_toast");
+  const template = wrap.querySelector(".tabs_hidden .tabs_toast");
   const toast = template.cloneNode(true);
   toast.querySelector(".tabs_toast_text").textContent = message;
-  component.querySelector(".tabs_list").appendChild(toast);
+  wrap.querySelector(".tabs_list").appendChild(toast);
   ```
   Never use `innerHTML`, `createElement`, or template literal HTML for elements with visual structure
 - No classes without CSS styles — use DOM order for JS targeting
@@ -518,13 +538,14 @@ This applies everywhere, not just visual compositions.
 - `opacity` property to fade text — use `color-mix(in hsl, currentColor [%], transparent)`
 - `innerHTML`, `createElement`, or template literal HTML in JS — use the `_hidden` clone pattern
 - `getElementById`, `id` attributes, or JS targeting by `id`
+- In vanilla mode: scattered `DOMContentLoaded` listeners or per-component `dataset.scriptInitialized` guards — collect inits into one `initFunction()` called once on a single `DOMContentLoaded`
 - Combo classes in CSS but not in the HTML — Webflow purges them; put them in a `_hidden u-display-none` div _(Webflow only)_
 - Text elements missing `margin-bottom: var(--_text-style---margin-bottom)`
 - Text parent missing `u-margin-trim`
 - Hardcoding `max-width: Nch` (or any `max-width`) on text — set `data-number="N"` on the `u-heading`/`u-text` wrapper instead
 - Empty divs without `padding: 0` _(Webflow only)_
 - Buttons without padding
-- `<style>` not first child or `<script>` not last child inside `_wrap`
+- `<style>` not first child or `<script>` not last child inside `_wrap` _(Webflow only — vanilla mode keeps component CSS/JS in `css/styles.css` and `js/main.js`, not inline)_
 - Percentage values on `top`/`left`/`bottom`/`right` for positioning — use corner anchors with `0` and `transform` in `em`
 - `top: 50%; left: 50%; transform: translate(-50%, -50%)` — use flex centering on parent
 - `transform` with `em` on an element with its own `font-size` in visual compositions — wrap in a positioning div

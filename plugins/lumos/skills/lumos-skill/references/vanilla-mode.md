@@ -13,17 +13,16 @@ project/
 ├── index.html
 ├── css/
 │   ├── lumos-foundation.css   ← copied from this skill's assets/, linked first
-│   └── styles.css             ← optional: shared/page-level component styles
+│   └── styles.css             ← all component styles
 └── js/
-    └── main.js                ← optional: shared scripts
+    └── main.js                ← all component scripts
 ```
 
-Two equally valid ways to place component code:
-
-- **Per-component blocks (recommended, mirrors the skill).** Keep each component's `<style>` as the first child and `<script>` as the last child inside its `_wrap`, exactly as the rules describe. This keeps components self-contained and copy-pasteable.
-- **Collected files.** Move the same CSS/JS into `css/styles.css` and `js/main.js`. The rules don't change — only the location. Prefer per-component blocks unless the user asks otherwise.
+**Component CSS and JS live in external files, not inline.** The skill's per-component `<style>`/`<script>` blocks exist only so each component is a self-contained paste into the Webflow Designer — a vanilla project has real files, so that reason is gone. Collect every component's styles into `css/styles.css` (linked after the foundation) and every component's scripts into `js/main.js` (loaded once before `</body>`). Nothing else changes: class names, combo-class scoping, the `data-trigger`/`data-state` technique, and the JS init-guard/scoping pattern are all identical to Webflow mode — only the location of the CSS and JS differs.
 
 ## HTML boilerplate
+
+`index.html` — markup only, no inline `<style>`/`<script>`:
 
 ```html
 <!DOCTYPE html>
@@ -34,23 +33,12 @@ Two equally valid ways to place component code:
     <title>Page title</title>
     <!-- Foundation FIRST, before any component styles -->
     <link rel="stylesheet" href="css/lumos-foundation.css" />
-    <!-- Optional shared styles AFTER the foundation -->
+    <!-- Component styles AFTER the foundation -->
     <link rel="stylesheet" href="css/styles.css" />
   </head>
   <body class="page_wrap">
     <!-- Sections go here. Apply a theme class to each section. -->
     <section class="hero_wrap u-section u-theme-light">
-      <style>
-        .hero_layout.u-grid-above {
-          --_column-count---value: 2;
-        }
-        .hero_title.u-text-style-h1 {
-          margin-bottom: var(--_text-style---margin-bottom);
-        }
-        .hero_text.u-text-style-main {
-          margin-bottom: var(--_text-style---margin-bottom);
-        }
-      </style>
       <div class="hero_contain u-container">
         <div class="hero_layout u-grid-above">
           <div class="hero_content u-margin-trim">
@@ -61,8 +49,43 @@ Two equally valid ways to place component code:
         </div>
       </div>
     </section>
+    <!-- Component scripts, loaded once at the end -->
+    <script src="js/main.js"></script>
   </body>
 </html>
+```
+
+`css/styles.css` — every component's styles (what would have been the hero's inline `<style>`):
+
+```css
+.hero_layout.u-grid-above {
+  --_column-count---value: 2;
+}
+.hero_title.u-text-style-h1 {
+  margin-bottom: var(--_text-style---margin-bottom);
+}
+.hero_text.u-text-style-main {
+  margin-bottom: var(--_text-style---margin-bottom);
+}
+```
+
+`js/main.js` — each component that needs JS gets a named init function, all collected into one `initFunction()` run once on `DOMContentLoaded` (full rules in `SKILL.md`). The hero above needs no JS, so `main.js` stays empty until a component does; the shape is:
+
+```js
+const initHeroWrap = () => {
+  const wrap = document.querySelector(".hero_wrap");
+  if (!wrap) return;
+  // wrap.querySelector(...) — scope every query to the component
+};
+
+const initFunction = () => {
+  initHeroWrap();
+  // ...one call per component; font/layout-dependent inits go in document.fonts.ready.then()
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+  initFunction();
+});
 ```
 
 ## The page wrapper (`page_wrap`)
@@ -79,6 +102,7 @@ So wrap every section in a single `<body class="page_wrap">`. On import it becom
 
 These Webflow-only workarounds are **dropped** — they only exist to satisfy the Webflow Designer:
 
+- **Inline `<style>`/`<script>` blocks are gone.** They exist only to make each component a self-contained paste for the Webflow Designer. In a vanilla project, component CSS lives in `css/styles.css` and component JS in `js/main.js` (see *Project skeleton* above). Class names, combo-class scoping, and the JS init-guard/scoping pattern are unchanged.
 - **Combo classes can be CSS-only.** Webflow purges classes not present in the canvas, which is why dynamically-toggled combo classes (e.g. `.tabs_link_wrap.is-active`) normally need a `_hidden u-display-none` placeholder. In vanilla CSS nothing is purged, so define them directly and skip the placeholder. Still use the hidden-template clone pattern for JS-appended markup — that's a clean technique, not a workaround.
 - **No empty-div `padding: 0`.** Webflow injects default padding into empty elements; the browser doesn't. Omit the fix unless you actually want padding.
 - **No `.w-*` classes.** Anything keyed to `.w-richtext`, `.w-dyn-item`, `.w-condition-invisible`, `.wf-design-mode`, etc. is Webflow runtime only and has been stripped from the foundation.
