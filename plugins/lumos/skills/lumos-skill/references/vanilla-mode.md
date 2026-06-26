@@ -37,6 +37,8 @@ project/
     <link rel="stylesheet" href="css/styles.css" />
   </head>
   <body class="page_wrap">
+    <!-- Navbar is a top-level component, a sibling of the sections — never inside one -->
+    <nav class="nav_wrap"></nav>
     <!-- Sections go here. Apply a theme class to each section. -->
     <section class="hero_wrap u-section u-theme-light">
       <div class="hero_contain u-container">
