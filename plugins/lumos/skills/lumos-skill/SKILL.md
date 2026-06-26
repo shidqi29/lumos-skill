@@ -81,7 +81,7 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
     // 2. Early-return validation
     if (!wrap) return;
     // 3. Scope every query to the component
-    const button = wrap.querySelector(".hero_button");
+    const button = wrap.querySelector(".button_wrap");
   };
   ```
   Name it `init` + the component in PascalCase (`.hero_wrap` → `initHeroWrap`). If a component repeats on the page, select all and iterate inside the same function, early-returning when none exist: `const cards = document.querySelectorAll(".card_wrap"); if (!cards.length) return; cards.forEach((wrap) => { /* wrap.querySelector(...) */ });`
@@ -140,6 +140,7 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
 - Combo classes always scoped: `.hero_card_wrap.is-reversed { }` not `.is-reversed { }`
 - Combo classes must exist in the HTML — Webflow removes unused classes. If a combo class is only applied dynamically (e.g. JS toggling `.is-active`) **and has CSS styles defined for it** (e.g. `.tabs_link_wrap.is-active { ... }`), place an element with it inside a `[component]_hidden u-display-none` div. If the combo class has no CSS (JS only uses it for querying/targeting), no `_hidden` placeholder is needed. If a `_hidden` div already exists (for clone templates), reuse it _(Webflow only — in vanilla mode CSS-only combo classes are fine and need no `_hidden` placeholder)_
 - Every element must have a component class — no bare `<span>`, `<div>`, or `<a>` with only a utility class
+- **Reusable UI atoms get one shared class, reused everywhere — not a per-section copy.** Buttons, links, badges, tags, and other small repeated elements are defined **once** as a single shared component class (`button_wrap`, `link_wrap`, `badge_wrap`) and reused across every section — don't restyle the same thing under a fresh `hero_button` / `cta_button` class each time. Express differences as scoped `.is-*` variant combo classes (`.button_wrap.is-secondary`, `.button_wrap.is-small`); the variant must appear in the HTML (Webflow purges unused combos). This applies only to small reusable atoms — layout/content components (hero, card, section) stay per-component
 - Interactive elements (`<a>`, `<button>`) that act as component roots must end in `_wrap`
 - Any element containing children with component classes must end in `_wrap`
 - SVG `<path>` and `<line>` elements need their own component class for stroke styling — named as siblings to the SVG, not nested: `enterprise_button_path` not `enterprise_button_svg_path`
@@ -258,11 +259,11 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
 
 ### Buttons
 
-- No button utility — always style on component class with `data-trigger="hover focus"`
+- **One shared, reusable button class — `button_wrap` — defined once and used for every button on the site.** Don't create per-section button classes (`hero_button`, `cta_button`); reuse `button_wrap` and add `.is-*` variants for differences. No button utility — style on the `button_wrap` class with `data-trigger="hover focus"`
 - Buttons must always include padding — default: `padding: var(--_spacing---space--3) var(--_spacing---space--5)`
-- Primary:
+- Base (primary):
   ```css
-  .hero_button {
+  .button_wrap {
     padding: var(--_spacing---space--3) var(--_spacing---space--5);
     background-color: color-mix(
       in hsl,
@@ -287,7 +288,25 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
     transition: all 300ms;
   }
   ```
-- Secondary (outlined): same pattern with `--_theme---button-secondary--*`
+- Variants are scoped `.is-*` combo classes on the same base. The combo (`.button_wrap.is-secondary`, specificity 0,2,0) outranks the base, so it overrides only what it sets:
+  ```css
+  /* Secondary/outlined — same color-mix + trigger pattern as the base, swapping
+     --_theme---button-primary--* → --_theme---button-secondary--* for background, text, border */
+  .button_wrap.is-secondary {
+    /* ... */
+  }
+  /* Size variant — only overrides padding */
+  .button_wrap.is-small {
+    padding: var(--_spacing---space--2) var(--_spacing---space--4);
+  }
+  ```
+- Usage — reuse the same class, vary with combos, inside the `u-button-wrapper`:
+  ```html
+  <div class="hero_actions u-button-wrapper">
+    <a class="button_wrap" href="#" data-trigger="hover focus">Primary</a>
+    <a class="button_wrap is-secondary" href="#" data-trigger="hover focus">Secondary</a>
+  </div>
+  ```
 
 ### Color & Theming
 
@@ -561,6 +580,7 @@ This applies everywhere, not just visual compositions.
 - Hardcoding `max-width: Nch` (or any `max-width`) on text — set `data-number="N"` on the `u-heading`/`u-text` wrapper instead
 - Empty divs without `padding: 0` _(Webflow only)_
 - Buttons without padding
+- Per-section button/link classes (`hero_button`, `cta_button`) that restyle the same atom — reuse one shared `button_wrap`/`link_wrap` class with `.is-*` variants
 - `<style>` not first child or `<script>` not last child inside `_wrap` _(Webflow only — vanilla mode keeps component CSS/JS in `css/styles.css` and `js/main.js`, not inline)_
 - Percentage values on `top`/`left`/`bottom`/`right` for positioning — use corner anchors with `0` and `transform` in `em`
 - `top: 50%; left: 50%; transform: translate(-50%, -50%)` — use flex centering on parent
