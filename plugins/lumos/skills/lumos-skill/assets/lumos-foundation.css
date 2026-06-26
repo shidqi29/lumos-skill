@@ -74,6 +74,7 @@ button:not(:disabled) {
 img {
   max-width: 100%;
   height: auto;
+  object-fit: cover;
   display: block;
 }
 video {
@@ -95,8 +96,12 @@ img::selection {
   background: transparent;
 }
 
+a {
+  color: inherit;
+  text-decoration: none;
+}
 a:not([class]) {
-  text-decoration: underline;
+  text-decoration: underline; /* rich-text links keep the underline */
 }
 h1,
 h2,

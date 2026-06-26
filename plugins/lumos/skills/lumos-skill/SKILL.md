@@ -62,7 +62,27 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
 - When setting `color` alongside `background-color`, apply both to the same element — don't put `background-color` on a parent and `color` on a child. The element with the background should own its text color
 - `var(--border-width--main)` for all border widths
 - Always use `--_theme---*` variables for colors. When a design specifies a color outside the theme system, map it to the closest theme variable. **Never use hex codes anywhere — not in CSS, comments, or explanatory text.** Don't tell the user to map hex values — just use the closest `--_theme---*` variable directly
-- `img`/`video` already have `object-fit: cover` and `img` has `width: 100%` — don't re-add
+- `img`/`video` default to `object-fit: cover` (foundation) — don't re-add `object-fit`. Don't size a bare `img`; use the image-wrapper pattern below
+- **Images use a relative wrapper + an absolutely-filled `img`.** Put the `<img>` in a `_img_wrap` div that defines the box (`position: relative` + an `aspect-ratio`, or sized by the layout); the `<img>` fills it with `position: absolute; width: 100%; height: 100%` (object-fit cover is already the default). The skeleton loading color goes on the wrapper:
+  ```html
+  <div class="hero_img_wrap">
+    <img class="hero_img" src="..." alt="..." loading="lazy" />
+  </div>
+  ```
+  ```css
+  .hero_img_wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    background-color: var(--_theme---background-skeleton);
+  }
+  .hero_img {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    /* object-fit: cover is the foundation default */
+  }
+  ```
 - Icons/logos next to text need `flex-shrink: 0`
 - Square icons/logos: `width` + `aspect-ratio: 1/1` — not `width` + `height`
 - Logos need `object-fit: contain` (overrides default `cover`)
@@ -142,11 +162,12 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
 - Every element must have a component class — no bare `<span>`, `<div>`, or `<a>` with only a utility class
 - **Reusable UI atoms get one shared class, reused everywhere — not a per-section copy.** Buttons, links, badges, tags, and other small repeated elements are defined **once** as a single shared component class (`button_wrap`, `link_wrap`, `badge_wrap`) and reused across every section — don't restyle the same thing under a fresh `hero_button` / `cta_button` class each time. Express differences as scoped `.is-*` variant combo classes (`.button_wrap.is-secondary`, `.button_wrap.is-small`); the variant must appear in the HTML (Webflow purges unused combos). This applies only to small reusable atoms — layout/content components (hero, card, section) stay per-component
 - Interactive elements (`<a>`, `<button>`) that act as component roots must end in `_wrap`
+- **Links and buttons only wrap — they never hold text directly.** The interactive element is the `_wrap`, with a child text `<div>` inside: `<a class="button_wrap"><div class="button_text">Label</div></a>`. Padding/background/border live on `_wrap`; text styling and animation live on `_text`. Exceptions: inline links inside a paragraph stay `<a>text</a>` (can't nest a `<div>` in prose), and a real `<button>` element takes a `<span>` child instead of `<div>` (button content must be inline)
 - Any element containing children with component classes must end in `_wrap`
 - SVG `<path>` and `<line>` elements need their own component class for stroke styling — named as siblings to the SVG, not nested: `enterprise_button_path` not `enterprise_button_svg_path`
 - SVG inside a subcomponent starts a new subcomponent name: `enterprise_button_svg` not `enterprise_button_arrow_svg`
 - Decorative SVGs need `aria-hidden="true"`
-- Images (not logos, not transparent) need `background-color: var(--_theme---background-skeleton)` as a loading placeholder
+- Images (not logos, not transparent) need `background-color: var(--_theme---background-skeleton)` as a loading placeholder — put it on the `_img_wrap` wrapper (the `img` sits absolutely on top)
 - Direct parents of text elements should not be `display: flex` — flex prevents margin collapsing. Use `display: block` or no display override
 - Buttons must be wrapped in a div with `u-button-wrapper`: `<div class="hero_actions u-button-wrapper">`
 
@@ -303,8 +324,12 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
 - Usage — reuse the same class, vary with combos, inside the `u-button-wrapper`:
   ```html
   <div class="hero_actions u-button-wrapper">
-    <a class="button_wrap" href="#" data-trigger="hover focus">Primary</a>
-    <a class="button_wrap is-secondary" href="#" data-trigger="hover focus">Secondary</a>
+    <a class="button_wrap" href="#" data-trigger="hover focus">
+      <div class="button_text">Primary</div>
+    </a>
+    <a class="button_wrap is-secondary" href="#" data-trigger="hover focus">
+      <div class="button_text">Secondary</div>
+    </a>
   </div>
   ```
 
@@ -581,6 +606,9 @@ This applies everywhere, not just visual compositions.
 - Empty divs without `padding: 0` _(Webflow only)_
 - Buttons without padding
 - Per-section button/link classes (`hero_button`, `cta_button`) that restyle the same atom — reuse one shared `button_wrap`/`link_wrap` class with `.is-*` variants
+- Link/button holding text directly (`<a class="button_wrap">Label</a>`) instead of wrapping a `_text` div — except inline prose links
+- Bare `img` sized directly instead of a relative `_img_wrap` wrapper + absolutely-filled `img`
+- Per-component `text-decoration: none` on links to kill the underline — the foundation already resets `a { text-decoration: none }` (only `a:not([class])` rich-text stays underlined); stripping it link-by-link is whack-a-mole and misses elements like the logo
 - `<style>` not first child or `<script>` not last child inside `_wrap` _(Webflow only — vanilla mode keeps component CSS/JS in `css/styles.css` and `js/main.js`, not inline)_
 - Percentage values on `top`/`left`/`bottom`/`right` for positioning — use corner anchors with `0` and `transform` in `em`
 - `top: 50%; left: 50%; transform: translate(-50%, -50%)` — use flex centering on parent
