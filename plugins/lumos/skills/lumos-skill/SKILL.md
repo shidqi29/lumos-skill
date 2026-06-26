@@ -173,16 +173,20 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
     grid-template-columns: repeat(12, minmax(0, 1fr));
   }
   ```
-- **The navbar is its own top-level component, separate from every section.** Place `<nav class="nav_wrap">` as a direct child of `page_wrap`, a sibling of the `<section>` elements (normally the first child) — never inside a `u-section` and never wrapping one. It doesn't take `u-section` (it's a bar, not a content section), but it can use an inner `nav_contain u-container` for content width:
+- **The site header is its own top-level component, separate from every section.** Place `<header class="header_wrap">` as a direct child of `page_wrap`, a sibling of the `<section>` elements (normally the first child) — never inside a `u-section` and never wrapping one. The top-level `<header>` is the `banner` landmark, so the primary navbar lives **inside** it as a `<nav>` (a navbar is introductory/navigational content — it belongs in `<header>` for correct semantics). The header doesn't take `u-section` (it's a bar, not a content section), but use an inner `header_contain u-container` for content width:
   ```html
   <body class="page_wrap">
-    <nav class="nav_wrap">
-      <div class="nav_contain u-container">...</div>
-    </nav>
+    <header class="header_wrap">
+      <div class="header_contain u-container">
+        <a class="header_logo_wrap" href="/">...</a>
+        <nav class="header_nav_wrap">...</nav>
+      </div>
+    </header>
     <section class="hero_wrap u-section">...</section>
     <section class="features_wrap u-section">...</section>
   </body>
   ```
+  This is for the primary site nav only — secondary navs (footer nav, in-page table of contents, breadcrumbs) are standalone `<nav>` and don't need a `<header>`.
 - First section: use `--_spacing---section-space--page-top` for nav offset
 
 ### Layout
@@ -540,7 +544,8 @@ This applies everywhere, not just visual compositions.
 - Bare `.component { }` CSS for an element that also has a utility class — scope it as the combo `.component.u-utility` so the component's declarations win over the utility
 - Grid columns with bare `1fr` — always `minmax(0, 1fr)`
 - `display: grid` or layout on `u-container` — use a child `_layout` div
-- Navbar nested inside a `<section>` or `u-section` — the nav is a separate top-level component, a sibling of the sections under `page_wrap`
+- Site header/navbar nested inside a `<section>` or `u-section` — the `<header>` is a separate top-level component, a sibling of the sections under `page_wrap`
+- Primary navbar as a bare top-level `<nav>` instead of wrapped in a top-level `<header>` (the banner landmark)
 - Hand-writing `display: grid` / `grid-template-columns` on a `_layout` — use `u-grid-above`/`u-grid-below` and set `--_column-count---value` on the combo class
 - Hex color codes (`#ff0000`, `#333`) anywhere — CSS, comments, or prose. Never reference hex values
 - Hardcoded colors (`white`, `black`, etc.) or border widths — always use `--_theme---*` variables
