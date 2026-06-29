@@ -1211,7 +1211,11 @@ label:has(input:focus-visible) [data-outline] {
   color: var(--_theme---text);
   --_theme---background: var(--swatch--brand-500);
   --_theme---text: var(--swatch--brand-text);
-  --_theme---heading-accent: color-mix(in srgb, var(--_theme---text), white 20%);
+  --_theme---heading-accent: color-mix(
+    in srgb,
+    var(--_theme---text),
+    white 20%
+  );
   --_theme---background-2: var(--swatch--brand-600);
   --_theme---border: var(--swatch--brand-text-o20);
   --_theme---text-link-primary--border-hover: var(--_theme---text);
@@ -1284,7 +1288,9 @@ label:has(input:focus-visible) [data-outline] {
   --_button-style---background-hover: var(
     --_theme---button-secondary--background-hover
   );
-  --_button-style---border-hover: var(--_theme---button-secondary--border-hover);
+  --_button-style---border-hover: var(
+    --_theme---button-secondary--border-hover
+  );
   --_button-style---text-hover: var(--_theme---button-secondary--text-hover);
 }
 .u-button-style-tertiary {
@@ -1850,7 +1856,12 @@ label:has(input:focus-visible) [data-outline] {
   overflow: clip auto;
 }
 .u-overflow-hidden-left {
-  clip-path: polygon(0 0, calc(100% + 100vw) 0, calc(100% + 100vw) 100%, 0% 100%);
+  clip-path: polygon(
+    0 0,
+    calc(100% + 100vw) 0,
+    calc(100% + 100vw) 100%,
+    0% 100%
+  );
 }
 
 /* Display */
@@ -2597,20 +2608,21 @@ label:has(input:focus-visible) [data-outline] {
 
 /* --- Responsive system: threshold containers ----------------------------
    This skill uses the threshold + utility approach below — NOT a CSS-variable
-   keyword system. Responsive switches react to the nearest CONTAINER width via
-   the named threshold-large / threshold-medium / threshold-small container
-   queries declared on `.u-container` (and -small/-full). The grid/order
+   keyword system. `.u-container` (and -small/-full) hosts all three named
+   threshold containers (threshold-large / threshold-medium / threshold-small,
+   container-type: inline-size), so responsive switches react to the nearest
+   CONTAINER width — query whichever breakpoint you need. The grid/order
    utilities (u-grid-above, u-grid-below, u-order-unset-*, u-all-unset-*) ride on
-   those, and any other responsive change is written as an explicit
+   those, and any other responsive change is an explicit
    `@container threshold-large|medium|small (...)` rule.
    (The old --_responsive---* / --flex-* keyword-variable system was removed.)
    ------------------------------------------------------------------------- */
 
 /* --- threshold-* responsive utilities (from the global style) ------------ */
-/* The threshold-* containers are declared on .u-container / .u-container-small /
-   .u-container-full (container-type: inline-size), so @container threshold-*
-   rules react to that container's width — i.e. the component's own width, not the
-   page. Most layout lives inside a u-container, so grids collapse as the column
+/* u-container / -small / -full carry container-name: threshold-large
+   threshold-medium threshold-small (inline-size), so @container threshold-*
+   rules react to the container's width (the component's column area, not the
+   page). Most layout lives inside a u-container, so grids collapse as the column
    area narrows. */
 
 /* Base grid for u-grid-above / u-grid-below. The utility itself provides the grid,

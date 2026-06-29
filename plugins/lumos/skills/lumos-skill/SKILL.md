@@ -180,7 +180,7 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
 ```
 
 - `u-section`: `display: flex; flex-flow: column; background-color: var(--_theme---background); color: var(--_theme---text); padding-top/bottom: var(--_spacing---section-space--main)`
-- `u-container`: `max-width: var(--max-width--main); width: calc(100% - var(--site--margin) * 2); display: flex; flex-flow: column; container-type: inline-size; gap: var(--_spacing---space--8)`
+- `u-container`: `max-width: var(--max-width--main); width: calc(100% - var(--site--margin) * 2); margin-inline: auto; flex: 1; container-type: inline-size; container-name: threshold-large threshold-medium threshold-small` — centers and bounds the content width and is the named responsive container (hosts all three thresholds). It has no `display`/`gap` of its own; put layout on the `_layout` child
 - **Never apply layout directly on `u-container`** — it has `container-type: inline-size`, so `@container` rules affect its children, not itself. Always use a child `_layout` div:
   ```css
   /* CORRECT — `u-grid-above` on the _layout div supplies the grid; just set the column count */
@@ -331,7 +331,7 @@ Responsive uses the **threshold + utility** approach — never `@media`, and no 
 
 #### Threshold containers
 
-Declared on `u-container` / `u-container-small` / `u-container-full` (`container-type: inline-size`): `threshold-large` (62em), `threshold-medium` (48em), `threshold-small` (30em). Query them by name to react to the container's width (the column area), not the page.
+`u-container` (and `-small`/`-full`) hosts all three named threshold containers (`container-type: inline-size; container-name: threshold-large threshold-medium threshold-small`): `threshold-large` (62em), `threshold-medium` (48em), `threshold-small` (30em). Query any by name to react to the container's width (the column area), not the page.
 
 #### Grid → stack (the common case)
 
