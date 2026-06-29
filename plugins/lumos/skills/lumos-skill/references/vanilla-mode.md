@@ -98,9 +98,10 @@ Webflow can't paste a `<body>` tag — the HTML-to-Webflow import tool wraps the
 
 - base font, color, and background
 - `min-height: 100vh` so the background fills the viewport
-- the `container-name: threshold-large threshold-medium threshold-small` + `container-type: inline-size` that drive the whole responsive system
 
-So wrap every section in a single `<body class="page_wrap">`. On import it becomes `<div class="page_wrap">` and every style — including the threshold containers — carries over unchanged. Never add a `body { … }` rule; put page-level styles on `.page_wrap`.
+(The threshold responsive containers are **not** on `page_wrap` — they live on `u-container` so queries react to the column area's width; see Responsive.)
+
+So wrap every section in a single `<body class="page_wrap">`. On import it becomes `<div class="page_wrap">` and every style carries over unchanged. Never add a `body { … }` rule; put page-level styles on `.page_wrap`.
 
 ## What differs from Webflow mode
 
@@ -146,4 +147,4 @@ The foundation is assembled from three layers with different provenance:
 
 For 1:1 parity with a specific Webflow project, replace layers 2 and 3 with that project's exported **Variables** (`:root` custom properties) and **utility-class CSS**. Because the variable names match, this is a drop-in swap — paste them over sections 2 and 3 and component output is unaffected.
 
-Responsive behavior runs entirely through the `threshold-*` system: the utilities (`u-grid-above`/`u-grid-below`, `u-order-unset-*`, `u-all-unset-*`) plus named `@container threshold-large|medium|small` queries, at the global style's own `62 / 48 / 30em` breakpoints, scoped to the `page_wrap` container (not `body` — see above). (The older `--_responsive---*` / `--flex-*` keyword-variable system has been removed from the foundation.)
+Responsive behavior runs entirely through the `threshold-*` system: the utilities (`u-grid-above`/`u-grid-below`, `u-order-unset-*`, `u-all-unset-*`) plus named `@container threshold-large|medium|small` queries, at the global style's own `62 / 48 / 30em` breakpoints, scoped to the `u-container` (so they react to the column area's width, not the page). (The older `--_responsive---*` / `--flex-*` keyword-variable system has been removed from the foundation.)

@@ -36,7 +36,7 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
 - Vanilla HTML, CSS, JS only
 - Only write CSS for component classes and container queries — never for `u-*` utilities
 - No CSS resets, `:root` definitions, `body`/`page_wrap` styles, or utility redefinitions
-- **Never style the bare `body` selector.** Webflow can't paste a `<body>`, so the import tool turns the body's class into a wrapper `<div>` — only class-based styles survive. All body-level styles (font, color, background, the threshold containers) live on the `page_wrap` wrapper class in the foundation. In vanilla output wrap the page in `<body class="page_wrap">` (see `references/vanilla-mode.md`)
+- **Never style the bare `body` selector.** Webflow can't paste a `<body>`, so the import tool turns the body's class into a wrapper `<div>` — only class-based styles survive. All body-level styles (font, color, background) live on the `page_wrap` wrapper class in the foundation (the threshold responsive containers live on `u-container`). In vanilla output wrap the page in `<body class="page_wrap">` (see `references/vanilla-mode.md`)
 - No `px` — default to `rem`. Text `max-width` uses `ch`, set via `data-number="N"` (see Typography). Container query breakpoints use `em`
 - Class-only selectors — no tag names, IDs, data attributes, or descendant selectors
 - No fallback values in `var()`
@@ -74,7 +74,6 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
     position: relative;
     width: 100%;
     aspect-ratio: 3 / 2;
-    background-color: var(--_theme---background-skeleton);
   }
   .hero_img {
     position: absolute;
@@ -167,9 +166,8 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
 - SVG `<path>` and `<line>` elements need their own component class for stroke styling — named as siblings to the SVG, not nested: `enterprise_button_path` not `enterprise_button_svg_path`
 - SVG inside a subcomponent starts a new subcomponent name: `enterprise_button_svg` not `enterprise_button_arrow_svg`
 - Decorative SVGs need `aria-hidden="true"`
-- Images (not logos, not transparent) need `background-color: var(--_theme---background-skeleton)` as a loading placeholder — put it on the `_img_wrap` wrapper (the `img` sits absolutely on top)
 - Direct parents of text elements should not be `display: flex` — flex prevents margin collapsing. Use `display: block` or no display override
-- Buttons must be wrapped in a div with `u-button-wrapper`: `<div class="hero_actions u-button-wrapper">`
+- Buttons must be wrapped in a div with `u-button-group`: `<div class="hero_actions u-button-group">`
 
 ### Sections & Containers
 
@@ -241,41 +239,24 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
 - Tag (`h1`–`h6`) is semantic; utility controls visual size
 - Font weight: use `--_typography---font--primary-regular`, `--_typography---font--primary-medium`, or `--_typography---font--primary-bold` — never raw numeric weights like `400`, `500`, `700`
 - Letter spacing: use `--_typography---letter-spacing--tight` (-0.03em) — never raw values like `-0.03em` or `-1px`
-- Most headings and body text need `margin-bottom: var(--_text-style---margin-bottom)` for vertical rhythm
-- The direct parent of text elements with margins (usually `_content`) should have `u-margin-trim`
-- **Text wrapping pattern**: since `_content` is `display: block`, headings and paragraphs that need a `max-width` must be wrapped in a div with `u-heading` or `u-text`. These utilities have `min-width: 100%`, `flex-direction: column`, `align-items: inherit`, and `max-width: calc(var(--number) * 1ch)` — so they stay full width, pass the character-based max-width to their direct children via `max-width: inherit`, and inherit center alignment from `_content`. **Set the line width with `data-number="N"` on the wrapper** (N = max characters per line) — never write a `max-width` declaration in CSS for text. The component class, `display: flex`, and `margin-bottom` go on the wrapper. **When centering, add `u-alignment-center` to `_content`** — this utility provides `text-align: center`, `justify-content: center`, and `align-items: center`. Don't write these styles manually. Flex children like `u-button-wrapper` and `u-heading`/`u-text` wrappers use `justify-content: inherit` and `align-items: inherit` to pick up alignment from `_content`:
+- Space text vertically with `gap` on the flex `_content` (a spacing variable), or `margin-bottom: var(--_text-style---margin-bottom)` on each text element when `_content` is a block
+- A block `_content` that relies on text margins should have `u-margin-trim` (drops the first child's top / last child's bottom margin); a flex `_content` spaced with `gap` doesn't need it
+- **Headings & paragraphs use the `u-text-style-*` utility directly on the element** for sizing — `<h1 class="hero_title u-text-style-h1">`, `<p class="hero_text u-text-style-main">`. Don't wrap them. (`c-heading`/`c-paragraph` and `u-heading`/`u-text` are reserved for rich-text fields and the Webflow heading/paragraph component — never for direct headings/paragraphs.)
+- **Limit line length with a `u-max-width-*ch` utility** (`u-max-width-20ch` … `u-max-width-80ch`) — never write a `max-width` for text in CSS. Make `_content` a **flex column** spaced with `gap`; **center by adding `u-alignment-center` to `_content`** (it sets `text-align`, `justify-content`, and `align-items` to center) — width-limited text and `u-button-group` then center as flex children:
   ```html
-  <div class="hero_content u-alignment-center u-margin-trim">
-    <div class="hero_title u-heading u-text-style-h2" data-number="10">
-      <h1></h1>
-    </div>
-    <div class="hero_text u-text u-text-style-small" data-number="40">
-      <p></p>
-    </div>
+  <div class="hero_content u-alignment-center">
+    <h1 class="hero_title u-text-style-h2 u-max-width-20ch"></h1>
+    <p class="hero_text u-text-style-small u-max-width-40ch"></p>
   </div>
   ```
   ```css
   .hero_content {
-    width: 100%;
-  }
-  .hero_title.u-text-style-h2 {
     display: flex;
-    margin-bottom: var(--_text-style---margin-bottom);
-  }
-  .hero_text.u-text-style-small {
-    display: flex;
-    margin-bottom: var(--_text-style---margin-bottom);
+    flex-flow: column;
+    gap: var(--_spacing---space--4);
   }
   ```
-  If text doesn't need a `max-width`, it can go directly on the element without a wrapper:
-  ```html
-  <h1 class="hero_title u-text-style-h1"></h1>
-  ```
-  ```css
-  .hero_title.u-text-style-h1 {
-    margin-bottom: var(--_text-style---margin-bottom);
-  }
-  ```
+  For a left-aligned block, omit `u-alignment-center`. Omit `u-max-width-*ch` when no line limit is wanted
 - Reduced-opacity text: `color: color-mix(in srgb, currentColor 80%, transparent)` — adjust percentage as needed. Never use the `opacity` property to fade text
 
 ### Buttons
@@ -323,9 +304,9 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
     padding: var(--_spacing---space--2) var(--_spacing---space--4);
   }
   ```
-- Usage — reuse the same class, vary with combos, inside the `u-button-wrapper`:
+- Usage — reuse the same class, vary with combos, inside the `u-button-group`:
   ```html
-  <div class="hero_actions u-button-wrapper">
+  <div class="hero_actions u-button-group">
     <a class="button_wrap" href="#" data-trigger="hover focus">
       <div class="button_text">Primary</div>
     </a>
@@ -346,7 +327,7 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
 
 - `u-theme-light` (default), `u-theme-dark`, `u-theme-brand` — apply to sections/cards, all variables update automatically
 - **Choosing the right theme class**: `u-theme-light` for light/white backgrounds, `u-theme-dark` for dark/black backgrounds, `u-theme-brand` for colored backgrounds (green, blue, etc.). Nav and section should share the same theme class when they share visual context
-- Theme variables: `--_theme---background`, `--_theme---text`, `--_theme---border`, `--_theme---background-2` (lighter shade of the section background — use for pill buttons, tags, badges, nav buttons, or any element needing subtle contrast), `--_theme---background-skeleton`
+- Theme variables: `--_theme---background`, `--_theme---text`, `--_theme---border`, `--_theme---background-2` (lighter shade of the section background — use for pill buttons, tags, badges, nav buttons, or any element needing subtle contrast)
 - Links: `--_theme---text-link--border|text|border-hover|text-hover`
 - Buttons: read the `--_button-style---*` alias (defaults to `--_theme---button-primary--*`); color variants remap it to `--_theme---button-secondary--*` (tertiary, etc.). **Buttons MUST always use the button variables for all colors (background, text, border)** — never `--_theme---text`/`--_theme---background` or the inverted-colors technique. The button variables are already configured per theme to produce the correct visual result
 - **Don't set `color` on headings or paragraphs** unless the text color differs from the section's inherited `--_theme---text`
@@ -354,11 +335,11 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
 
 ### Responsive
 
-Responsive uses the **threshold + utility** approach — never `@media`, and no `--_responsive---*` / `--flex-*` keyword-variable math. Responsive switches react to **page width** via named container queries declared on the `page_wrap` wrapper.
+Responsive uses the **threshold + utility** approach — never `@media`, and no `--_responsive---*` / `--flex-*` keyword-variable math. Responsive switches react to the nearest **container width** via named container queries declared on `u-container` (and `u-container-small` / `u-container-full`).
 
 #### Threshold containers
 
-Declared on `page_wrap` (the single page wrapper, not `body`): `threshold-large` (62em), `threshold-medium` (48em), `threshold-small` (30em). Query them by name to react to page width.
+Declared on `u-container` / `u-container-small` / `u-container-full` (`container-type: inline-size`): `threshold-large` (62em), `threshold-medium` (48em), `threshold-small` (30em). Query them by name to react to the container's width (the column area), not the page.
 
 #### Grid → stack (the common case)
 
@@ -389,7 +370,7 @@ Never write `display: grid` or `grid-template-columns` yourself — `u-grid-abov
 For flex-direction switches, alignment changes, a different column count, or a collapse point other than 62em, write an explicit named threshold query — pick the container matching the breakpoint:
 
 ```css
-/* CORRECT — react to page width via the named threshold container */
+/* CORRECT — react to container width via the named threshold container */
 @container threshold-medium (width < 48em) {
   .enterprise_header {
     flex-direction: column;
@@ -406,7 +387,7 @@ For flex-direction switches, alignment changes, a different column count, or a c
 ```
 
 - Breakpoints always in `em`: large `62em`, medium `48em`, small `30em`
-- Threshold queries react to **page** width (the `page_wrap` container). To react to a component's **own** width instead, query the nearest `u-container` (`container-type: inline-size`) with an unnamed `@container (width < Xem)` — affects its children only
+- Threshold queries react to the nearest **container** width (the `u-container`, which is the column area). For a finer, component-local query you can also use an unnamed `@container (width < Xem)` against the nearest `container-type: inline-size` ancestor — affects its children only
 
 ### Trigger & State System
 
@@ -611,7 +592,7 @@ This applies everywhere, not just visual compositions.
 - Combo classes in CSS but not in the HTML — Webflow purges them; put them in a `_hidden u-display-none` div _(Webflow only)_
 - Text elements missing `margin-bottom: var(--_text-style---margin-bottom)`
 - Text parent missing `u-margin-trim`
-- Hardcoding `max-width: Nch` (or any `max-width`) on text — set `data-number="N"` on the `u-heading`/`u-text` wrapper instead
+- Hardcoding `max-width: Nch` (or any `max-width`) on text — use a `u-max-width-*ch` utility instead
 - Empty divs without `padding: 0` _(Webflow only)_
 - Buttons without padding
 - Per-section button/link classes (`hero_button`, `cta_button`) that restyle the same atom — reuse one shared `button_wrap`/`link_wrap` class with `.is-*` variants
