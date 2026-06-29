@@ -159,7 +159,7 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
 - Combo classes always scoped: `.hero_card_wrap.is-reversed { }` not `.is-reversed { }`
 - Combo classes must exist in the HTML — Webflow removes unused classes. If a combo class is only applied dynamically (e.g. JS toggling `.is-active`) **and has CSS styles defined for it** (e.g. `.tabs_link_wrap.is-active { ... }`), place an element with it inside a `[component]_hidden u-display-none` div. If the combo class has no CSS (JS only uses it for querying/targeting), no `_hidden` placeholder is needed. If a `_hidden` div already exists (for clone templates), reuse it _(Webflow only — in vanilla mode CSS-only combo classes are fine and need no `_hidden` placeholder)_
 - Every element must have a component class — no bare `<span>`, `<div>`, or `<a>` with only a utility class
-- **Reusable UI atoms get one shared class, reused everywhere — not a per-section copy.** Buttons, links, badges, tags, and other small repeated elements are defined **once** as a single shared component class (`button_wrap`, `link_wrap`, `badge_wrap`) and reused across every section — don't restyle the same thing under a fresh `hero_button` / `cta_button` class each time. Express differences as scoped `.is-*` variant combo classes (`.button_wrap.is-secondary`, `.button_wrap.is-small`); the variant must appear in the HTML (Webflow purges unused combos). This applies only to small reusable atoms — layout/content components (hero, card, section) stay per-component
+- **Reusable UI atoms get one shared class, reused everywhere — not a per-section copy.** Buttons, links, badges, tags, and other small repeated elements are defined **once** as a single shared component class (`button_wrap`, `link_wrap`, `badge_wrap`) and reused across every section — don't restyle the same thing under a fresh `hero_button` / `cta_button` class each time. Express differences as scoped `.is-*` variant combo classes (`.button_wrap.is-small`, `.card_wrap.is-reversed`); the variant must appear in the HTML (Webflow purges unused combos). (Buttons' colour variants are the `.u-button-style-*` mode utilities — see Buttons.) This applies only to small reusable atoms — layout/content components (hero, card, section) stay per-component
 - Interactive elements (`<a>`, `<button>`) that act as component roots must end in `_wrap`
 - **Links and buttons only wrap — they never hold text directly.** The interactive element is the `_wrap`, with a child text `<div>` inside: `<a class="button_wrap"><div class="button_text">Label</div></a>`. Padding/background/border live on `_wrap`; text styling and animation live on `_text`. Exceptions: inline links inside a paragraph stay `<a>text</a>` (can't nest a `<div>` in prose), and a real `<button>` element takes a `<span>` child instead of `<div>` (button content must be inline)
 - Any element containing children with component classes must end in `_wrap`
@@ -231,6 +231,7 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
 - `u-margin-trim` removes first child margin-top / last child margin-bottom
 - Gap for lists/columns, margins for text elements
 - Flex containers with multiple children should almost always have `gap` using a spacing variable — missing gap is a common oversight
+- Prefer the `u-gap-*` utility (`u-gap-4`, `u-gap-gutter`, …) on flex/grid containers over writing `gap` in component CSS: it applies the gap **and** registers the value as a mode of the gap collection on a Webflow import. (Same idea for the other mode collections — `u-theme-*`, `u-text-style-*`, `u-button-style-*`, `u-alignment-*` export their modes only when the class is on a real element; see `references/webflow-variable-naming.md`.)
 
 ### Typography
 
@@ -288,17 +289,8 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
     transition: all 300ms;
   }
   ```
-- Variants are scoped `.is-*` combo classes. A **color variant just remaps `--_button-style---*`** — the base `color-mix` declarations then resolve to the new colors automatically (the combo, specificity 0,2,0, outranks the base):
+- **Color variants are `.u-button-style-*` mode utilities** — `u-button-style-secondary`, `-tertiary`, `-quaternary` (the base `button_wrap` is primary). The utility remaps `--_button-style---*`, so the base `color-mix` declarations resolve to the new colors automatically — and on a vanilla→Webflow import it registers as a **mode** of the button-style collection (so keep it on the button element). No component CSS needed for the color; the `.u-button-style-*` classes live in the foundation. Other (non-color) variants stay scoped `.is-*` combos:
   ```css
-  /* Secondary/outlined — remap the alias to the secondary theme set */
-  .button_wrap.is-secondary {
-    --_button-style---background: var(--_theme---button-secondary--background);
-    --_button-style---background-hover: var(--_theme---button-secondary--background-hover);
-    --_button-style---text: var(--_theme---button-secondary--text);
-    --_button-style---text-hover: var(--_theme---button-secondary--text-hover);
-    --_button-style---border: var(--_theme---button-secondary--border);
-    --_button-style---border-hover: var(--_theme---button-secondary--border-hover);
-  }
   /* Size variant — only overrides padding */
   .button_wrap.is-small {
     padding: var(--_spacing---space--2) var(--_spacing---space--4);
@@ -310,7 +302,7 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
     <a class="button_wrap" href="#" data-trigger="hover focus">
       <div class="button_text">Primary</div>
     </a>
-    <a class="button_wrap is-secondary" href="#" data-trigger="hover focus">
+    <a class="button_wrap u-button-style-secondary" href="#" data-trigger="hover focus">
       <div class="button_text">Secondary</div>
     </a>
   </div>
@@ -329,7 +321,7 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
 - **Choosing the right theme class**: `u-theme-light` for light/white backgrounds, `u-theme-dark` for dark/black backgrounds, `u-theme-brand` for colored backgrounds (green, blue, etc.). Nav and section should share the same theme class when they share visual context
 - Theme variables: `--_theme---background`, `--_theme---text`, `--_theme---border`, `--_theme---background-2` (lighter shade of the section background — use for pill buttons, tags, badges, nav buttons, or any element needing subtle contrast)
 - Links: `--_theme---text-link--border|text|border-hover|text-hover`
-- Buttons: read the `--_button-style---*` alias (defaults to `--_theme---button-primary--*`); color variants remap it to `--_theme---button-secondary--*` (tertiary, etc.). **Buttons MUST always use the button variables for all colors (background, text, border)** — never `--_theme---text`/`--_theme---background` or the inverted-colors technique. The button variables are already configured per theme to produce the correct visual result
+- Buttons: read the `--_button-style---*` alias (defaults to `--_theme---button-primary--*`); switch style by applying a `u-button-style-*` mode utility (`secondary`/`tertiary`/`quaternary`), which remaps the alias and, on Webflow import, registers as a button-style mode. **Buttons MUST always use the button variables for all colors (background, text, border)** — never `--_theme---text`/`--_theme---background` or the inverted-colors technique. The button variables are already configured per theme to produce the correct visual result
 - **Don't set `color` on headings or paragraphs** unless the text color differs from the section's inherited `--_theme---text`
 - **Inverted colors for decorative elements only**: when SVGs, icons, badges, or other non-interactive decorative elements use colors without a specific theme variable, invert the section's theme — `--_theme---text` for the element's background/fill, `--_theme---background` for foreground elements on top. **Never apply this to buttons** — buttons always use `--_theme---button-primary--*` or `--_theme---button-secondary--*` regardless of their visual appearance
 

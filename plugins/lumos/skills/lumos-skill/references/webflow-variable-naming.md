@@ -48,20 +48,26 @@ Use a value that matches the intended type (e.g. `16px`, not `16`, for a size).
 
 ## Variable modes
 
-A mode is a class **`.u-<collection-slug>-<mode>`** that redefines that collection's variables. `<collection-slug>` = the collection name lowercased with spaces → `-` (collection "text style" → `text-style`).
+A mode is a class **`.u-<collection-slug>-<mode>`** that redefines that collection's variables. `<collection-slug>` = the collection name lowercased with spaces → `-` (collection "text style" → `text-style`). On a vanilla→Webflow import, each such class becomes a **mode** of its collection.
 
-- `.u-theme-dark` → theme collection, mode **Dark**
-- `.u-text-style-h2` → text style collection, mode **H2**
-- `.u-button-style-secondary` → button style collection, mode **Secondary**
-- `.u-trigger-active` → trigger collection, mode **Active** (`on`/`off` flip to `0`/`1`; Base in `:root`)
-- `.u-state-active` → state collection, mode **Active** (`true`/`false` flip to `0`/`1`; Base in `:root`)
+`lumos-foundation.css` ships these mode classes — apply them in your markup and the modes come across on import:
+
+| Collection | Variables | Mode classes (foundation) |
+|---|---|---|
+| theme | `--_theme---*` | `.u-theme-light` / `-dark` / `-brand` |
+| text style | `--_text-style---*` | `.u-text-style-display` / `-h1`…`-h6` / `-large` / `-medium` / `-main` / `-small` / `-tiny` |
+| button style | `--_button-style---*` | `.u-button-style-primary` / `-secondary` / `-tertiary` / `-quaternary` |
+| gap | `--_gap---size` | `.u-gap-0`…`-8` / `-gutter` / `-inherit` |
+| alignment | `--_alignment---direction` | `.u-alignment-start` / `-center` / `-end` |
+| trigger | `--_trigger---*` | `.u-trigger-active` (Base `on:1/off:0` → Active `on:0/off:1`) |
+| state | `--_state---*` | `.u-state-active` (Base `true:1/false:0` → Active `true:0/false:1`) |
 
 Rules:
 
-- **Default mode** = the values defined in `:root` / `html` / `body`.
+- **Default mode** = the values defined in `:root` / `html` / `body` (e.g. theme→Light, button-style→Primary, trigger→Base).
 - **An override must DIFFER from the base.** A mode whose values equal the base is skipped and won't register.
 - **Value-as-mode:** a collection set to a plain number per component — e.g. `.hero_layout.u-grid-above { --_column-count---value: 3; }` — makes the number the mode name.
-- **Put the mode class on a real element** (`u-theme-*` on the section, `u-text-style-*` on the text) so the binding is emitted and not pruned on import.
+- **Put the mode class on a real element** so the binding is emitted and not pruned on import — `u-theme-*` on the section, `u-text-style-*` on the text, `u-button-style-*` on the button, `u-gap-*` on the flex/grid container, `u-alignment-*` on the content wrapper. A mode whose class never appears in the HTML won't import. (The `u-trigger-active`/`u-state-active` modes ride on the runtime state-manager rules rather than a static element — verify they survive a real import.)
 
 ## Reference & raw
 

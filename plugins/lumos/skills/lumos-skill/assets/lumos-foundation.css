@@ -1261,9 +1261,58 @@ label:has(input:focus-visible) [data-outline] {
   --_theme---button-quaternary--text-hover: white;
 }
 
+/* --------------------------------------------------------------------------
+   Button-style modes — the "button style" collection (--_button-style---*).
+   Base mode = primary (in :root); these utilities switch a button's style by
+   remapping the alias. On a vanilla→Webflow import each registers as a variable
+   MODE of the button-style collection (like u-theme-dark for the theme
+   collection) — keep them on real elements so the mode isn't pruned. */
+.u-button-style-primary {
+  --_button-style---background: var(--_theme---button-primary--background);
+  --_button-style---border: var(--_theme---button-primary--border);
+  --_button-style---text: var(--_theme---button-primary--text);
+  --_button-style---background-hover: var(
+    --_theme---button-primary--background-hover
+  );
+  --_button-style---border-hover: var(--_theme---button-primary--border-hover);
+  --_button-style---text-hover: var(--_theme---button-primary--text-hover);
+}
+.u-button-style-secondary {
+  --_button-style---background: var(--_theme---button-secondary--background);
+  --_button-style---border: var(--_theme---button-secondary--border);
+  --_button-style---text: var(--_theme---button-secondary--text);
+  --_button-style---background-hover: var(
+    --_theme---button-secondary--background-hover
+  );
+  --_button-style---border-hover: var(--_theme---button-secondary--border-hover);
+  --_button-style---text-hover: var(--_theme---button-secondary--text-hover);
+}
+.u-button-style-tertiary {
+  --_button-style---background: var(--_theme---button-tertiary--background);
+  --_button-style---border: var(--_theme---button-tertiary--border);
+  --_button-style---text: var(--_theme---button-tertiary--text);
+  --_button-style---background-hover: var(
+    --_theme---button-tertiary--background-hover
+  );
+  --_button-style---border-hover: var(--_theme---button-tertiary--border-hover);
+  --_button-style---text-hover: var(--_theme---button-tertiary--text-hover);
+}
+.u-button-style-quaternary {
+  --_button-style---background: var(--_theme---button-quaternary--background);
+  --_button-style---border: var(--_theme---button-quaternary--border);
+  --_button-style---text: var(--_theme---button-quaternary--text);
+  --_button-style---background-hover: var(
+    --_theme---button-quaternary--background-hover
+  );
+  --_button-style---border-hover: var(
+    --_theme---button-quaternary--border-hover
+  );
+  --_button-style---text-hover: var(--_theme---button-quaternary--text-hover);
+}
+
 /* ==========================================================================
-   3. UTILITIES + RESPONSIVE SYSTEM  (reconstructed to match skill contracts;
-   the type scale references the real --_typography--- tokens above)
+   3. UTILITIES + RESPONSIVE SYSTEM  (reconciled to the real export's framework
+   layer; the type scale references the real --_typography--- tokens above)
    ========================================================================== */
 
 /* --- Section & container ------------------------------------------------- */
