@@ -23,7 +23,7 @@ In vanilla mode, the rules tagged _(Webflow only)_ are **dropped** — they exis
 
 - No combo-class-purging workaround. Combo classes may be CSS-only, so the `_hidden u-display-none` placeholder for dynamically-applied combo classes is **not required**. (The hidden-template clone pattern is still recommended for JS-appended markup — it's clean, not a workaround.)
 - No empty-div `padding: 0` fix (Webflow's default element padding doesn't exist).
-- No reliance on `.w-*` runtime classes.
+- No reliance on `.w-*` runtime classes — **except** the native dropdown (`.w-dropdown`), which is intentionally supported in vanilla via the foundation's base CSS plus a JS init (see Dropdowns and `references/webflow-native-dropdown.md`).
 
 When generating a full page, see `references/vanilla-mode.md` for the project skeleton, an HTML boilerplate, token customization, and fidelity notes. The foundation's variable names follow the Webflow Variables import convention so a vanilla project imports back into Webflow as native variables — keep the names intact and follow `references/webflow-variable-naming.md` when adding or customizing tokens.
 
@@ -276,45 +276,47 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
     margin-bottom: var(--_text-style---margin-bottom);
   }
   ```
-- Reduced-opacity text: `color: color-mix(in hsl, currentColor 80%, transparent)` — adjust percentage as needed. Never use the `opacity` property to fade text
+- Reduced-opacity text: `color: color-mix(in srgb, currentColor 80%, transparent)` — adjust percentage as needed. Never use the `opacity` property to fade text
 
 ### Buttons
 
+- **Use `<a>` for buttons, not `<button>` — reserve `<button>` for real form submit controls only.** Any button-like element (link, CTA, dropdown toggle, JS-action trigger) is an `<a class="button_wrap">`; only an actual form submit uses `<button type="submit">`. This is why the text-wrapper rule notes `<button>` needs a `<span>` child — that case is rare. A JS-action `<a>` should keep keyboard/focus behavior (it already gets focus styles; add `role`/`aria-*` for non-navigation triggers like dropdowns)
 - **One shared, reusable button class — `button_wrap` — defined once and used for every button on the site.** Don't create per-section button classes (`hero_button`, `cta_button`); reuse `button_wrap` and add `.is-*` variants for differences. No button utility — style on the `button_wrap` class with `data-trigger="hover focus"`
 - Buttons must always include padding — default: `padding: var(--_spacing---space--3) var(--_spacing---space--5)`
+- Buttons read the **`--_button-style---*` alias** (`background`, `text`, `border`, plus each `*-hover`), which defaults to the primary button theme vars and re-resolves per theme class. Write the `color-mix` trigger declarations **once** on the base; color variants just remap the alias (below) — no need to rewrite the `color-mix`. Always `color-mix(in srgb, …)` (the foundation's color space), `--_trigger---on` first, `--_trigger---off` second:
 - Base (primary):
   ```css
   .button_wrap {
     padding: var(--_spacing---space--3) var(--_spacing---space--5);
     background-color: color-mix(
-      in hsl,
-      var(--_theme---button-primary--background)
-        calc(100% * var(--_trigger---on)),
-      var(--_theme---button-primary--background-hover)
-        calc(100% * var(--_trigger---off))
+      in srgb,
+      var(--_button-style---background) calc(100% * var(--_trigger---on)),
+      var(--_button-style---background-hover) calc(100% * var(--_trigger---off))
     );
     color: color-mix(
-      in hsl,
-      var(--_theme---button-primary--text) calc(100% * var(--_trigger---on)),
-      var(--_theme---button-primary--text-hover)
-        calc(100% * var(--_trigger---off))
+      in srgb,
+      var(--_button-style---text) calc(100% * var(--_trigger---on)),
+      var(--_button-style---text-hover) calc(100% * var(--_trigger---off))
     );
     border-color: color-mix(
-      in hsl,
-      var(--_theme---button-primary--border) calc(100% * var(--_trigger---on)),
-      var(--_theme---button-primary--border-hover)
-        calc(100% * var(--_trigger---off))
+      in srgb,
+      var(--_button-style---border) calc(100% * var(--_trigger---on)),
+      var(--_button-style---border-hover) calc(100% * var(--_trigger---off))
     );
     border-width: var(--border-width--main);
     transition: all 300ms;
   }
   ```
-- Variants are scoped `.is-*` combo classes on the same base. The combo (`.button_wrap.is-secondary`, specificity 0,2,0) outranks the base, so it overrides only what it sets:
+- Variants are scoped `.is-*` combo classes. A **color variant just remaps `--_button-style---*`** — the base `color-mix` declarations then resolve to the new colors automatically (the combo, specificity 0,2,0, outranks the base):
   ```css
-  /* Secondary/outlined — same color-mix + trigger pattern as the base, swapping
-     --_theme---button-primary--* → --_theme---button-secondary--* for background, text, border */
+  /* Secondary/outlined — remap the alias to the secondary theme set */
   .button_wrap.is-secondary {
-    /* ... */
+    --_button-style---background: var(--_theme---button-secondary--background);
+    --_button-style---background-hover: var(--_theme---button-secondary--background-hover);
+    --_button-style---text: var(--_theme---button-secondary--text);
+    --_button-style---text-hover: var(--_theme---button-secondary--text-hover);
+    --_button-style---border: var(--_theme---button-secondary--border);
+    --_button-style---border-hover: var(--_theme---button-secondary--border-hover);
   }
   /* Size variant — only overrides padding */
   .button_wrap.is-small {
@@ -333,13 +335,20 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
   </div>
   ```
 
+### Dropdowns
+
+- **Use Webflow's native dropdown** (`.w-dropdown` > `.w-dropdown-toggle` + `.w-dropdown-list`) for any dropdown/menu — never hand-roll one. Add your own component classes alongside the `.w-*` classes for styling. Open state is the `.w--open` class; style reactions with `data-state="open"` on the toggle (the state system already listens to `.w--open`) — never select `.w--open` in CSS
+- **Webflow mode**: emit the markup only. Webflow's runtime supplies the base CSS and the open/close/keyboard JS — don't write or include either (the dropdown script ships in `webflow.js` on every Webflow site)
+- **Vanilla mode**: the foundation provides the structural `.w-dropdown` base CSS; add the dropdown init (`initDropdown()`) to `js/main.js` and call it from `initFunction()`. Its JS toggles the native `.w--open` class (the one sanctioned exception to the `.is-active`-only rule)
+- The toggle is a `<div role="button">`, not an `<a>` (it doesn't navigate) — the exception to "use `<a>` for triggers". Full markup, CSS, and the vanilla JS: `references/webflow-native-dropdown.md`
+
 ### Color & Theming
 
 - `u-theme-light` (default), `u-theme-dark`, `u-theme-brand` — apply to sections/cards, all variables update automatically
 - **Choosing the right theme class**: `u-theme-light` for light/white backgrounds, `u-theme-dark` for dark/black backgrounds, `u-theme-brand` for colored backgrounds (green, blue, etc.). Nav and section should share the same theme class when they share visual context
 - Theme variables: `--_theme---background`, `--_theme---text`, `--_theme---border`, `--_theme---background-2` (lighter shade of the section background — use for pill buttons, tags, badges, nav buttons, or any element needing subtle contrast), `--_theme---background-skeleton`
 - Links: `--_theme---text-link--border|text|border-hover|text-hover`
-- Buttons: `--_theme---button-primary--background|border|text|*-hover`, `--_theme---button-secondary--*` — **buttons MUST always use these button variables for all colors (background, text, border)**. Never use `--_theme---text`, `--_theme---background`, or the inverted colors technique on buttons. The button variables are already configured per theme to produce the correct visual result
+- Buttons: read the `--_button-style---*` alias (defaults to `--_theme---button-primary--*`); color variants remap it to `--_theme---button-secondary--*` (tertiary, etc.). **Buttons MUST always use the button variables for all colors (background, text, border)** — never `--_theme---text`/`--_theme---background` or the inverted-colors technique. The button variables are already configured per theme to produce the correct visual result
 - **Don't set `color` on headings or paragraphs** unless the text color differs from the section's inherited `--_theme---text`
 - **Inverted colors for decorative elements only**: when SVGs, icons, badges, or other non-interactive decorative elements use colors without a specific theme variable, invert the section's theme — `--_theme---text` for the element's background/fill, `--_theme---background` for foreground elements on top. **Never apply this to buttons** — buttons always use `--_theme---button-primary--*` or `--_theme---button-secondary--*` regardless of their visual appearance
 
@@ -429,7 +438,7 @@ Flips CSS variable values on a parent so children react without descendant selec
   ```
 
 - Don't wrap single variable in `calc()`: `opacity: var(--_state---false)` not `opacity: calc(var(--_state---false))`
-- Ordering: `true`/`on` always first, `false`/`off` second in `color-mix()` and `calc()`
+- Ordering: `true`/`on` always first, `false`/`off` second in `color-mix()` and `calc()`. `color-mix()` uses the `in srgb` color space
 - Patterns:
   ```css
   opacity: calc(1 - 0.4 * var(--_trigger---on));
@@ -595,7 +604,7 @@ This applies everywhere, not just visual compositions.
 - Hardcoded colors (`white`, `black`, etc.) or border widths — always use `--_theme---*` variables
 - `color` on headings/paragraphs that matches the section's inherited `--_theme---text` — redundant
 - Hardcoded button colors — use `--_theme---button-primary--*` or `--_theme---button-secondary--*`
-- `opacity` property to fade text — use `color-mix(in hsl, currentColor [%], transparent)`
+- `opacity` property to fade text — use `color-mix(in srgb, currentColor [%], transparent)`
 - `innerHTML`, `createElement`, or template literal HTML in JS — use the `_hidden` clone pattern
 - `getElementById`, `id` attributes, or JS targeting by `id`
 - In vanilla mode: scattered `DOMContentLoaded` listeners or per-component `dataset.scriptInitialized` guards — collect inits into one `initFunction()` called once on a single `DOMContentLoaded`
@@ -606,6 +615,8 @@ This applies everywhere, not just visual compositions.
 - Empty divs without `padding: 0` _(Webflow only)_
 - Buttons without padding
 - Per-section button/link classes (`hero_button`, `cta_button`) that restyle the same atom — reuse one shared `button_wrap`/`link_wrap` class with `.is-*` variants
+- `<button>` for a link, CTA, or dropdown toggle — use `<a>`; reserve `<button>` for real form submit controls (the dropdown toggle is the exception: a native `<div role="button">`)
+- Hand-rolled dropdown instead of Webflow's native `.w-dropdown` structure; or shipping the dropdown JS in a Webflow export (Webflow's runtime already provides it)
 - Link/button holding text directly (`<a class="button_wrap">Label</a>`) instead of wrapping a `_text` div — except inline prose links
 - Bare `img` sized directly instead of a relative `_img_wrap` wrapper + absolutely-filled `img`
 - Per-component `text-decoration: none` on links to kill the underline — the foundation already resets `a { text-decoration: none }` (only `a:not([class])` rich-text stays underlined); stripping it link-by-link is whack-a-mole and misses elements like the logo

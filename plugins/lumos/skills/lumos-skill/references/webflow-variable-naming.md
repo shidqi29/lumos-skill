@@ -53,6 +53,8 @@ A mode is a class **`.u-<collection-slug>-<mode>`** that redefines that collecti
 - `.u-theme-dark` → theme collection, mode **Dark**
 - `.u-text-style-h2` → text style collection, mode **H2**
 - `.u-button-style-secondary` → button style collection, mode **Secondary**
+- `.u-trigger-active` → trigger collection, mode **Active** (`on`/`off` flip to `0`/`1`; Base in `:root`)
+- `.u-state-active` → state collection, mode **Active** (`true`/`false` flip to `0`/`1`; Base in `:root`)
 
 Rules:
 

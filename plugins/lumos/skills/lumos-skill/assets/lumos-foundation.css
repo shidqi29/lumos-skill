@@ -123,7 +123,7 @@ label {
   margin-bottom: 0;
 }
 select:has(option[value=""]:checked) {
-  color: color-mix(in lab, currentcolor 60%, transparent);
+  color: color-mix(in srgb, currentcolor 60%, transparent);
 }
 
 /* Selection Color */
@@ -271,6 +271,11 @@ label:has(input:focus-visible) [data-outline] {
   --_state---true: 1;
   --_state---false: 0;
 }
+/* `.u-state-active` / `.u-trigger-active` export each collection's "Active"
+   variable mode to Webflow (the Base mode lives in :root). They share the rule
+   with the runtime selectors, which apply the same flip dynamically in a
+   from-scratch project. */
+.u-state-active,
 .is-active,
 [data-state~="checked"]:is(:checked, :has(:checked)),
 [data-state~="current"]:is(
@@ -288,6 +293,7 @@ label:has(input:focus-visible) [data-outline] {
   --_state---true: 0;
   --_state---false: 1;
 }
+.u-trigger-active,
 [data-trigger~="focus"]:is(:focus-visible, :has(:focus-visible)),
 [data-trigger~="group"]:has(
     [data-trigger~="focus-other"]:focus-visible,
@@ -314,6 +320,31 @@ label:has(input:focus-visible) [data-outline] {
     --_trigger---on: 0;
     --_trigger---off: 1;
   }
+}
+
+/* Webflow native dropdown — structural base so .w-dropdown markup works in a
+   from-scratch project (Webflow's runtime provides this on a real site). The
+   open/close JS lives in js/main.js; see references/webflow-native-dropdown.md.
+   Put all visual styling on your own component classes (+ data-state="open"). */
+.w-dropdown {
+  position: relative;
+  display: inline-block;
+}
+.w-dropdown-toggle {
+  cursor: pointer;
+  user-select: none;
+}
+.w-dropdown-list {
+  position: absolute;
+  min-width: 100%;
+  display: none;
+}
+.w-dropdown-list.w--open {
+  display: block;
+}
+.w-inline-block {
+  max-width: 100%;
+  display: inline-block;
 }
 
 /* ==========================================================================
