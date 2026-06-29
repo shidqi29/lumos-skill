@@ -54,7 +54,7 @@ A mode is a class **`.u-<collection-slug>-<mode>`** that redefines that collecti
 
 | Collection | Variables | Mode classes (foundation) |
 |---|---|---|
-| theme | `--_theme---*` | `.u-theme-light` / `-dark` / `-brand` |
+| theme | `--_theme---*` | **base = Light** (`:root`); `.u-theme-dark` / `.u-theme-brand` are the override modes; `.u-theme-light` just re-applies the base (so it folds into base on import, not a separate mode) |
 | text style | `--_text-style---*` | `.u-text-style-display` / `-h1`…`-h6` / `-large` / `-medium` / `-main` / `-small` / `-tiny` |
 | button style | `--_button-style---*` | `.u-button-style-primary` / `-secondary` / `-tertiary` / `-quaternary` |
 | gap | `--_gap---size` | `.u-gap-0`…`-8` / `-gutter` / `-inherit` |

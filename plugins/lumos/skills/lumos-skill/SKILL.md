@@ -317,8 +317,10 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
 
 ### Color & Theming
 
-- `u-theme-light` (default), `u-theme-dark`, `u-theme-brand` — apply to sections/cards, all variables update automatically
-- **Choosing the right theme class**: `u-theme-light` for light/white backgrounds, `u-theme-dark` for dark/black backgrounds, `u-theme-brand` for colored backgrounds (green, blue, etc.). Nav and section should share the same theme class when they share visual context
+- **Light is the theme collection's base mode** (the `:root` values) — so `u-theme-light` is never needed to *get* light; it only flips a section back to light under a dark/brand page
+- **Theme cascades from `page_wrap` — don't put a theme class on every section.** The page's default theme lives on `page_wrap`: `<body class="page_wrap">` is light (the base mode — add nothing), while a dark- or brand-default design adds the combo class there: `<body class="page_wrap u-theme-dark">`. Every section/component inherits the `--_theme---*` vars automatically
+- **Add `u-theme-*` to a section/card only to OVERRIDE the page default** — a section whose theme differs from the rest
+- **Choosing the right theme**: `u-theme-light` for light/white backgrounds, `u-theme-dark` for dark/black, `u-theme-brand` for colored (green, blue, etc.). The header/nav inherits the page default like everything else — give it its own `u-theme-*` only when its visual context differs
 - Theme variables: `--_theme---background`, `--_theme---text`, `--_theme---border`, `--_theme---background-2` (lighter shade of the section background — use for pill buttons, tags, badges, nav buttons, or any element needing subtle contrast)
 - Links: `--_theme---text-link--border|text|border-hover|text-hover`
 - Buttons: read the `--_button-style---*` alias (defaults to `--_theme---button-primary--*`); switch style by applying a `u-button-style-*` mode utility (`secondary`/`tertiary`/`quaternary`), which remaps the alias and, on Webflow import, registers as a button-style mode. **Buttons MUST always use the button variables for all colors (background, text, border)** — never `--_theme---text`/`--_theme---background` or the inverted-colors technique. The button variables are already configured per theme to produce the correct visual result

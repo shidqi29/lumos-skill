@@ -36,13 +36,15 @@ project/
     <!-- Component styles AFTER the foundation -->
     <link rel="stylesheet" href="css/styles.css" />
   </head>
+  <!-- Page default theme lives here: light needs nothing; a dark/brand-default
+       design adds the combo class, e.g. <body class="page_wrap u-theme-dark"> -->
   <body class="page_wrap">
     <!-- Header (banner) wraps the primary nav; top-level, a sibling of the sections — never inside one -->
     <header class="header_wrap">
       <nav class="header_nav_wrap"></nav>
     </header>
-    <!-- Sections go here. Apply a theme class to each section. -->
-    <section class="hero_wrap u-section u-theme-light">
+    <!-- Sections inherit the page theme; add u-theme-* on a section only to override it -->
+    <section class="hero_wrap u-section">
       <div class="hero_contain u-container">
         <div class="hero_layout u-grid-above">
           <div class="hero_content u-margin-trim">
@@ -118,7 +120,7 @@ Everything else is identical: class naming, fluid `rem`/`ch`/`em` sizing, no `@m
 
 All brand values live in **section 2** of `lumos-foundation.css`. Keep the variable names; change the values:
 
-- **Colors** — edit the `:root` theme block and the `.u-theme-light` / `.u-theme-dark` / `.u-theme-brand` classes. Pick a section's palette with the theme class on the `_wrap`.
+- **Colors** — edit the `:root` theme block and the `.u-theme-light` / `.u-theme-dark` / `.u-theme-brand` classes. Set the page default theme on `page_wrap` (light needs no class; dark/brand → `u-theme-*` combo on `page_wrap`); add `u-theme-*` to a section only to override that default.
 - **Spacing** — `--_spacing---space--1…8` and the fluid `--_spacing---section-space--*`.
 - **Type scale** — the `.u-text-style-*` rules use `clamp()` for breakpointless sizing; adjust min/max as needed.
 - **Fonts** — set `--_typography---family--primary` (and load the webfont in `<head>` if it isn't a system font). Weight tokens are `--_typography---font--primary-regular|medium|bold`.
