@@ -99,8 +99,8 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
     const wrap = document.querySelector(".hero_wrap");
     // 2. Early-return validation
     if (!wrap) return;
-    // 3. Scope every query to the component
-    const button = wrap.querySelector(".button_wrap");
+    // 3. Target child elements by data attribute, never class
+    const button = wrap.querySelector("[data-hero-button]");
   };
   ```
   Name it `init` + the component in PascalCase (`.hero_wrap` → `initHeroWrap`). If a component repeats on the page, select all and iterate inside the same function, early-returning when none exist: `const cards = document.querySelectorAll(".card_wrap"); if (!cards.length) return; cards.forEach((wrap) => { /* wrap.querySelector(...) */ });`
@@ -124,24 +124,24 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
   No per-component init guard — each init runs exactly once from the single entry point.
 - **Placement by mode.** _Vanilla_: every init function, `initFunction()`, and the single `DOMContentLoaded` live in `js/main.js`. _Webflow_: each component's inline `<script>` is standalone — it defines its own init function and calls it in its own `DOMContentLoaded` (separate embeds can't share one `initFunction()`). A component that may be placed multiple times in Webflow keeps the `querySelectorAll().forEach()` + `dataset.scriptInitialized` guard instead of a top-level named const, since duplicate embeds would otherwise redeclare it _(Webflow only)_.
 - `const`/`let` only, no `var`. No ALL_CAPS names
-- Target by class or `data-` attribute only — never by `id`. Scope every query to the component via `wrap.querySelector(...)`. Use `document.querySelector` only to grab the component root or to reach outside the component (rare, should be commented)
+- **Select elements only by custom `data-*` attributes — never by class** (and never by `id`). Classes are for styling and can be renamed or purged; `data-*` are stable JS hooks. Name them `data-[component]-[element]` (e.g. `data-tabs-link`, `data-hero-button`). The **one exception is the scoping anchor** — select the component wrap by its `_wrap` class — and `document.querySelector` is used only to grab that wrap (or, rarely, reach outside the component; comment it). Everything inside the wrap is queried via `data-*`, scoped to the wrap
 - Only `.is-active` for toggling state — no `.is-visible`, `.is-open`, etc.
 - JS-appended elements: never hard-code HTML strings. Place a hidden template inside the component wrapped in `.[component]_hidden.u-display-none`. JS clones from the template:
   ```html
-  <div class="tabs_hidden u-display-none">
-    <div class="tabs_toast">
-      <span class="tabs_toast_text u-text-style-small"></span>
+  <div class="tabs_hidden u-display-none" data-tabs-hidden>
+    <div class="tabs_toast" data-tabs-toast>
+      <span class="tabs_toast_text u-text-style-small" data-tabs-toast-text></span>
     </div>
   </div>
   ```
   ```javascript
-  const template = wrap.querySelector(".tabs_hidden .tabs_toast");
+  const template = wrap.querySelector("[data-tabs-toast]");
   const toast = template.cloneNode(true);
-  toast.querySelector(".tabs_toast_text").textContent = message;
-  wrap.querySelector(".tabs_list").appendChild(toast);
+  toast.querySelector("[data-tabs-toast-text]").textContent = message;
+  wrap.querySelector("[data-tabs-list]").appendChild(toast);
   ```
   Never use `innerHTML`, `createElement`, or template literal HTML for elements with visual structure
-- No classes without CSS styles — use DOM order for JS targeting
+- Don't add classes solely for JS (Webflow purges classes without CSS) — add a `data-*` attribute for JS targeting instead of an extra class or DOM-order reliance
 - Screen size checks: `getComputedStyle` not `window.innerWidth`
 - Mobile interaction override: `transform: unset !important;` inside container query
 
@@ -312,7 +312,7 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
 
 - **Use Webflow's native dropdown** (`.w-dropdown` > `.w-dropdown-toggle` + `.w-dropdown-list`) for any dropdown/menu — never hand-roll one. Add your own component classes alongside the `.w-*` classes for styling. Open state is the `.w--open` class; style reactions with `data-state="open"` on the toggle (the state system already listens to `.w--open`) — never select `.w--open` in CSS
 - **Webflow mode**: emit the markup only. Webflow's runtime supplies the base CSS and the open/close/keyboard JS — don't write or include either (the dropdown script ships in `webflow.js` on every Webflow site)
-- **Vanilla mode**: the foundation provides the structural `.w-dropdown` base CSS; add the dropdown init (`initDropdown()`) to `js/main.js` and call it from `initFunction()`. Its JS toggles the native `.w--open` class (the one sanctioned exception to the `.is-active`-only rule)
+- **Vanilla mode**: the foundation provides the structural `.w-dropdown` base CSS; add the dropdown init (`initDropdown()`) to `js/main.js` and call it from `initFunction()`. Its JS toggles the native `.w--open` class (the one sanctioned exception to the `.is-active`-only rule) and selects the native `.w-dropdown-*` classes (the component's contract — the exception to the `data-*`-targeting rule)
 - The toggle is a `<div role="button">`, not an `<a>` (it doesn't navigate) — the exception to "use `<a>` for triggers". Full markup, CSS, and the vanilla JS: `references/webflow-native-dropdown.md`
 
 ### Color & Theming
@@ -582,6 +582,7 @@ This applies everywhere, not just visual compositions.
 - `opacity` property to fade text — use `color-mix(in srgb, currentColor [%], transparent)`
 - `innerHTML`, `createElement`, or template literal HTML in JS — use the `_hidden` clone pattern
 - `getElementById`, `id` attributes, or JS targeting by `id`
+- Selecting elements by class in JS (`wrap.querySelector(".tabs_link")`) — target by a `data-*` attribute instead (`[data-tabs-link]`); only the component wrap is selected by class, as the scoping anchor
 - In vanilla mode: scattered `DOMContentLoaded` listeners or per-component `dataset.scriptInitialized` guards — collect inits into one `initFunction()` called once on a single `DOMContentLoaded`
 - Combo classes in CSS but not in the HTML — Webflow purges them; put them in a `_hidden u-display-none` div _(Webflow only)_
 - Text elements missing `margin-bottom: var(--_text-style---margin-bottom)`
