@@ -2108,51 +2108,132 @@ label:has(input:focus-visible) [data-outline] {
   display: grid;
 }
 
-/* Column span */
-.u-column-full {
+/* Column start — the grid line a child starts at. Composes with u-column-span-*
+   (e.g. u-column-start-3 u-column-span-4 → starts at line 3, spans 4 columns). */
+.u-column-start-auto {
+  grid-column-start: auto;
+}
+.u-column-start-1 {
+  grid-column-start: 1;
+}
+.u-column-start-2 {
+  grid-column-start: 2;
+}
+.u-column-start-3 {
+  grid-column-start: 3;
+}
+.u-column-start-4 {
+  grid-column-start: 4;
+}
+.u-column-start-5 {
+  grid-column-start: 5;
+}
+.u-column-start-6 {
+  grid-column-start: 6;
+}
+.u-column-start-7 {
+  grid-column-start: 7;
+}
+.u-column-start-8 {
+  grid-column-start: 8;
+}
+.u-column-start-9 {
+  grid-column-start: 9;
+}
+.u-column-start-10 {
+  grid-column-start: 10;
+}
+.u-column-start-11 {
+  grid-column-start: 11;
+}
+.u-column-start-12 {
+  grid-column-start: 12;
+}
+
+/* Column span — how many columns a child spans. -full / -indent are absolute
+   (set both grid lines); -1…-12 set only the end (span N) so they compose with
+   a u-column-start-* on the same element. */
+.u-column-span-full {
   grid-column: 1 / -1;
 }
-.u-column-custom {
-  grid-column: auto / span 1;
-}
-.u-column-indent {
+.u-column-span-indent {
   grid-column: 2 / -2;
 }
-.u-column-1 {
-  grid-column: auto / span 1;
+.u-column-span-1 {
+  grid-column-end: span 1;
 }
-.u-column-2 {
-  grid-column: auto / span 2;
+.u-column-span-2 {
+  grid-column-end: span 2;
 }
-.u-column-3 {
-  grid-column: auto / span 3;
+.u-column-span-3 {
+  grid-column-end: span 3;
 }
-.u-column-4 {
-  grid-column: auto / span 4;
+.u-column-span-4 {
+  grid-column-end: span 4;
 }
-.u-column-5 {
-  grid-column: auto / span 5;
+.u-column-span-5 {
+  grid-column-end: span 5;
 }
-.u-column-6 {
-  grid-column: auto / span 6;
+.u-column-span-6 {
+  grid-column-end: span 6;
 }
-.u-column-7 {
-  grid-column: auto / span 7;
+.u-column-span-7 {
+  grid-column-end: span 7;
 }
-.u-column-8 {
-  grid-column: auto / span 8;
+.u-column-span-8 {
+  grid-column-end: span 8;
 }
-.u-column-9 {
-  grid-column: auto / span 9;
+.u-column-span-9 {
+  grid-column-end: span 9;
 }
-.u-column-10 {
-  grid-column: auto / span 10;
+.u-column-span-10 {
+  grid-column-end: span 10;
 }
-.u-column-11 {
-  grid-column: auto / span 11;
+.u-column-span-11 {
+  grid-column-end: span 11;
 }
-.u-column-12 {
-  grid-column: auto / span 12;
+.u-column-span-12 {
+  grid-column-end: span 12;
+}
+
+/* Row start — the grid line a child starts at (composes with u-row-span-*). */
+.u-row-start-1 {
+  grid-row-start: 1;
+}
+.u-row-start-2 {
+  grid-row-start: 2;
+}
+.u-row-start-3 {
+  grid-row-start: 3;
+}
+.u-row-start-4 {
+  grid-row-start: 4;
+}
+.u-row-start-5 {
+  grid-row-start: 5;
+}
+.u-row-start-6 {
+  grid-row-start: 6;
+}
+
+/* Row span — how many rows a child spans (composes with u-row-start-*). */
+.u-row-span-1 {
+  grid-row-end: span 1;
+}
+.u-row-span-2 {
+  grid-row-end: span 2;
+}
+.u-row-span-3 {
+  grid-row-end: span 3;
+}
+.u-row-span-4 {
+  grid-row-end: span 4;
+}
+.u-row-span-5 {
+  grid-row-end: span 5;
+}
+.u-row-span-6 {
+  grid-row-end: span 6;
 }
 
 /* Gap */

@@ -214,12 +214,12 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
 
 - Grids use `u-grid-above` (or `u-grid-below`) on the `_layout` div — the utility provides `display: grid`, the `--site--gutter` gutters, and `flex-flow: column`. Set the column count with `--_column-count---value` on the combo class (`.hero_layout.u-grid-above { --_column-count---value: 12; }`); override `grid-column-gap`/`grid-row-gap` there if needed. Don't write `display: grid` or `grid-template-columns` by hand. (The page default is 12, set on `page_wrap`; the base mode is 1. Setting the value per component registers that number as a column-count mode on a Webflow import.)
 - Grid columns: always `minmax(0, 1fr)` — never bare `1fr`: `repeat(2, minmax(0, 1fr))` not `1fr 1fr`
-- `grid-column-end: span 5` not `grid-column-end: 6`. Both: `grid-column: 1 / span 5`
+- **Place grid children with the placement utilities, not hand-written `grid-column`/`grid-row`.** Column start + span compose: `u-column-start-1…12` (start line, plus `u-column-start-auto`) with `u-column-span-1…12` (span N columns) — e.g. `u-column-start-3 u-column-span-4` starts at column 3 and spans 4. `u-column-span-full` (`1 / -1`) and `u-column-span-indent` (`2 / -2`) are absolute spans. Rows use `u-row-start-1…6` + `u-row-span-1…6`. Apply them on the grid child (a direct child of the `u-grid-*` `_layout`)
 - If you ever set `display: grid` manually (outside `u-grid-*`), it must also have `flex-direction: column` so it stacks when collapsed — but prefer `u-grid-above`/`u-grid-below`, which already include this
 - Direct grid children need `width: 100%`
 - Content blocks: `width: 100%` + `align-self: start|center|end` for vertical alignment
 - Two-column grids: `grid-row-gap: var(--_spacing---space--8)`
-- DOM order + `grid-column-start`/`grid-row-start` for positioning — avoid `order`
+- DOM order + the `u-column-start-*`/`u-row-start-*` utilities for positioning — avoid `order`
 - `@container` is for the `u-grid-*` system only; minimize custom container-query code (the grid collapse is automatic). Use Webflow `@media` breakpoints for non-grid responsiveness (see Responsive)
 
 ### Sizes & Spacing
@@ -581,6 +581,7 @@ This applies everywhere, not just visual compositions.
 - Site header/navbar nested inside a `<section>` or `u-section` — the `<header>` is a separate top-level component, a sibling of the sections under `page_wrap`
 - Primary navbar as a bare top-level `<nav>` instead of wrapped in a top-level `<header>` (the banner landmark)
 - Hand-writing `display: grid` / `grid-template-columns` on a `_layout` — use `u-grid-above`/`u-grid-below` and set `--_column-count---value` on the combo class
+- Hand-writing `grid-column`/`grid-row` placement on a grid child — use `u-column-start-*`/`u-column-span-*` and `u-row-start-*`/`u-row-span-*` (they compose: start line + span)
 - Hex color codes (`#ff0000`, `#333`) anywhere — CSS, comments, or prose. Never reference hex values
 - Hardcoded colors (`white`, `black`, etc.) or border widths — always use `--_theme---*` variables
 - `color` on headings/paragraphs that matches the section's inherited `--_theme---text` — redundant
