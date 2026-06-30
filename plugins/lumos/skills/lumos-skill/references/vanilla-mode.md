@@ -114,7 +114,7 @@ These Webflow-only workarounds are **dropped** — they only exist to satisfy th
 - **No empty-div `padding: 0`.** Webflow injects default padding into empty elements; the browser doesn't. Omit the fix unless you actually want padding.
 - **No `.w-*` classes.** Anything keyed to `.w-richtext`, `.w-dyn-item`, `.w-condition-invisible`, `.wf-design-mode`, etc. is Webflow runtime only and has been stripped from the foundation.
 
-Everything else is identical: class naming, fluid `rem`/`ch`/`em` sizing, no `@media`, the `threshold-*` responsive system (`u-grid-above`/`u-grid-below`, `u-order-unset-*`, `u-all-unset-*`, and named `@container threshold-*` queries), the `data-trigger`/`data-state` technique, scalable visual compositions, and the accessibility requirements.
+Everything else is identical: class naming, fluid `rem`/`ch`/`em` sizing, the dual responsive system (the breakpointless `u-grid-*` container-query grid + Webflow `@media` breakpoints for every other element — see *Responsive* in `SKILL.md`), the `data-trigger`/`data-state` technique, scalable visual compositions, and the accessibility requirements.
 
 ## Customizing tokens
 
@@ -149,4 +149,4 @@ The foundation is assembled from three layers with different provenance:
 
 For 1:1 parity with a specific Webflow project, replace layers 2 and 3 with that project's exported **Variables** (`:root` custom properties) and **utility-class CSS**. Because the variable names match, this is a drop-in swap — paste them over sections 2 and 3 and component output is unaffected.
 
-Responsive behavior runs entirely through the `threshold-*` system: the utilities (`u-grid-above`/`u-grid-below`, `u-order-unset-*`, `u-all-unset-*`) plus named `@container threshold-large|medium|small` queries, at the global style's own `62 / 48 / 30em` breakpoints, scoped to the `u-container` (so they react to the column area's width, not the page). (The older `--_responsive---*` / `--flex-*` keyword-variable system has been removed from the foundation.)
+Responsive behavior runs through **two systems**. The `u-grid-*` grid stays breakpointless: the utilities (`u-grid-above`/`u-grid-below`, `u-order-unset-*`, `u-all-unset-*`) plus named `@container threshold-large|medium|small` queries at the global style's own `62 / 48 / 30em` breakpoints, scoped to `u-container` (reacting to the column area's width, not the page). Every other element's responsiveness is hand-written in component CSS as Webflow `@media` breakpoints (`max-width: 991 / 767 / 479px`) so it imports onto the Designer's native breakpoints instead of a custom embed. (The older `--_responsive---*` / `--flex-*` keyword-variable system has been removed from the foundation.)

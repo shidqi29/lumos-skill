@@ -2582,14 +2582,15 @@ label:has(input:focus-visible) [data-outline] {
 }
 
 /* --- Responsive system: threshold containers ----------------------------
-   This skill uses the threshold + utility approach below — NOT a CSS-variable
-   keyword system. `.u-container` (and -small/-full) hosts all three named
-   threshold containers (threshold-large / threshold-medium / threshold-small,
-   container-type: inline-size), so responsive switches react to the nearest
-   CONTAINER width — query whichever breakpoint you need. The grid/order
-   utilities (u-grid-above, u-grid-below, u-order-unset-*, u-all-unset-*) ride on
-   those, and any other responsive change is an explicit
-   `@container threshold-large|medium|small (...)` rule.
+   Responsiveness uses TWO systems (NOT a CSS-variable keyword system).
+   1. The breakpointless GRID: `.u-container` (and -small/-full) hosts all three
+      named threshold containers (threshold-large / threshold-medium /
+      threshold-small, container-type: inline-size), so the grid utilities
+      (u-grid-above, u-grid-below, u-order-unset-*, u-all-unset-*) react to the
+      nearest CONTAINER width at the 62/48/30em thresholds below.
+   2. Everything else: hand-written Webflow @media breakpoints in component CSS
+      (max-width 991/767/479px, desktop-first) so a vanilla → Webflow import maps
+      them onto the Designer's native breakpoints instead of a custom embed.
    (The old --_responsive---* / --flex-* keyword-variable system was removed.)
    ------------------------------------------------------------------------- */
 

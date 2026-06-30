@@ -1,6 +1,6 @@
 ---
 name: lumos-skill
-description: 'Build responsive layouts with the Lumos Framework by Timothy Ricks — in Webflow OR in a plain HTML/CSS/JS project built from scratch. Use this skill whenever the user asks about Webflow layouts, HTML structure, responsive design, Lumos classes, Lumos utility classes, components, sections, grids, flexbox, spacing, typography, or color themes — and ALSO when building a vanilla HTML/CSS/JS site, landing page, or component from scratch, a static site, or a layout "without Webflow" where the user wants Lumos conventions (utility + component classes, fluid/breakpointless sizing, no media queries). Trigger when the user mentions "Lumos", "u-" classes, "breakpointless", fluid sizing, or framework patterns — even if they don''t say "Lumos Framework" or "Webflow" — and whenever the work involves building a responsive section, hero, nav, or page in raw HTML/CSS/JS.'
+description: 'Build responsive layouts with the Lumos Framework by Timothy Ricks — in Webflow OR in a plain HTML/CSS/JS project built from scratch. Use this skill whenever the user asks about Webflow layouts, HTML structure, responsive design, Lumos classes, Lumos utility classes, components, sections, grids, flexbox, spacing, typography, or color themes — and ALSO when building a vanilla HTML/CSS/JS site, landing page, or component from scratch, a static site, or a layout "without Webflow" where the user wants Lumos conventions (utility + component classes, fluid sizing, a breakpointless grid, and Webflow-breakpoint responsiveness). Trigger when the user mentions "Lumos", "u-" classes, "breakpointless", fluid sizing, or framework patterns — even if they don''t say "Lumos Framework" or "Webflow" — and whenever the work involves building a responsive section, hero, nav, or page in raw HTML/CSS/JS.'
 ---
 
 # Lumos Framework — Responsive Layouts
@@ -34,10 +34,10 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
 ### Output
 
 - Vanilla HTML, CSS, JS only
-- Only write CSS for component classes and container queries — never for `u-*` utilities
+- Only write CSS for component classes, their container queries, and Webflow `@media` breakpoints — never for `u-*` utilities
 - No CSS resets, `:root` definitions, `body`/`page_wrap` styles, or utility redefinitions
 - **Never style the bare `body` selector.** Webflow can't paste a `<body>`, so the import tool turns the body's class into a wrapper `<div>` — only class-based styles survive. All body-level styles (font, color, background) live on the `page_wrap` wrapper class in the foundation (the threshold responsive containers live on `u-container`). In vanilla output wrap the page in `<body class="page_wrap">` (see `references/vanilla-mode.md`)
-- No `px` — default to `rem`. Text `max-width` uses `ch`, set via `data-number="N"` (see Typography). Container query breakpoints use `em`
+- No `px` for sizing/layout — default to `rem`; text `max-width` uses `ch` via a `u-max-width-*ch` utility (see Typography). **Two breakpoint exceptions:** the `u-grid-*` container-query thresholds use `em` (`62`/`48`/`30em`), and Webflow `@media` breakpoints use Webflow's exact px (`991`/`767`/`479`) so the import maps them to Designer breakpoints (see Responsive)
 - Class-only selectors — no tag names, IDs, data attributes, or descendant selectors
 - No fallback values in `var()`
 - No inline `style=""` — put styles in `<style>` block
@@ -144,7 +144,7 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
   Never use `innerHTML`, `createElement`, or template literal HTML for elements with visual structure
 - Don't add classes solely for JS (Webflow purges classes without CSS) — add a `data-*` attribute for JS targeting instead of an extra class or DOM-order reliance
 - Screen size checks: `getComputedStyle` not `window.innerWidth`
-- Mobile interaction override: `transform: unset !important;` inside container query
+- Mobile interaction override: `transform: unset !important;` inside a Webflow mobile breakpoint (`@media screen and (max-width: 767px)`) or `@media (hover: none)`
 
 ### Class Naming
 
@@ -220,7 +220,7 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
 - Content blocks: `width: 100%` + `align-self: start|center|end` for vertical alignment
 - Two-column grids: `grid-row-gap: var(--_spacing---space--8)`
 - DOM order + `grid-column-start`/`grid-row-start` for positioning — avoid `order`
-- Minimize `@container` code — ideally only `display: flex` on parent
+- `@container` is for the `u-grid-*` system only; minimize custom container-query code (the grid collapse is automatic). Use Webflow `@media` breakpoints for non-grid responsiveness (see Responsive)
 
 ### Sizes & Spacing
 
@@ -329,15 +329,40 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
 
 ### Responsive
 
-Responsive uses the **threshold + utility** approach — never `@media`, and no `--_responsive---*` / `--flex-*` keyword-variable math. Responsive switches react to the nearest **container width** via named container queries declared on `u-container` (and `u-container-small` / `u-container-full`).
+**Two systems, split by element.** The container setup is unchanged either way — `u-container` (and `-small`/`-full`) keeps `container-type: inline-size; container-name: threshold-large threshold-medium threshold-small`.
 
-#### Threshold containers
+1. **The `u-grid-*` grid system stays breakpointless (container queries).** `u-grid-above` / `u-grid-below` and their threshold companions `u-order-unset-*` / `u-all-unset-*` collapse and reset at the named threshold container queries — `threshold-large` (62em), `threshold-medium` (48em), `threshold-small` (30em) — reacting to the **container's** width. This is the *only* place the breakpointless system is used.
+2. **Every other responsive change uses Webflow breakpoints (`@media`).** For anything that isn't the grid collapse — flex-direction, alignment, gap, sizing, show/hide, font-size, position, a non-grid reorder — write a `@media` query in that element's own component CSS at one of Webflow's four breakpoints (desktop-first, `max-width`, px to match Webflow exactly):
 
-`u-container` (and `-small`/`-full`) hosts all three named threshold containers (`container-type: inline-size; container-name: threshold-large threshold-medium threshold-small`): `threshold-large` (62em), `threshold-medium` (48em), `threshold-small` (30em). Query any by name to react to the container's width (the column area), not the page.
+| Breakpoint | Media query | Applies |
+|---|---|---|
+| **Desktop** | *(none — base styles)* | the base; author the desktop layout here |
+| **Tablet** | `@media screen and (max-width: 991px)` | ≤ 991px |
+| **Mobile landscape** | `@media screen and (max-width: 767px)` | ≤ 767px |
+| **Mobile portrait** | `@media screen and (max-width: 479px)` | ≤ 479px |
 
-#### Grid → stack (the common case)
+Desktop-first: the base (no query) is the desktop layout; override downward. Each smaller breakpoint inherits from the one above unless it overrides.
 
-Add `u-grid-above` to the `_layout` div. The utility itself supplies `display: grid`, the gutters (`--site--gutter`), and `flex-flow: column` — you only set the **column count** via `--_column-count---value` on the component combo class. Below the large threshold (62em) the threshold query collapses it to a vertical flex stack:
+```css
+/* Base = desktop */
+.enterprise_header {
+  display: flex;
+  align-items: center;
+}
+/* Tablet and down */
+@media screen and (max-width: 991px) {
+  .enterprise_header {
+    flex-direction: column;
+    align-items: start;
+  }
+}
+```
+
+**Why two systems.** On a vanilla → Webflow import, `@media` queries written at Webflow's exact breakpoints map onto the Designer's **native breakpoint styles**, so they stay editable in the Designer like a hand-built Webflow site. Container queries have no Designer-breakpoint equivalent, so they land in a custom embed's CSS — far harder to maintain. The grid genuinely needs to react to its container's width (not the viewport), so it keeps container queries; everything else uses Webflow media queries so it imports cleanly into the breakpoint system.
+
+#### Grid → stack (the breakpointless case)
+
+Add `u-grid-above` to the `_layout` div. The utility supplies `display: grid`, the gutters (`--site--gutter`), and `flex-flow: column` — you only set the **column count** via `--_column-count---value` on the component combo class. Below the large threshold (62em) the container query collapses it to a vertical flex stack:
 
 ```html
 <div class="hero_layout u-grid-above"></div>
@@ -352,36 +377,14 @@ Add `u-grid-above` to the `_layout` div. The utility itself supplies `display: g
 }
 ```
 
-Never write `display: grid` or `grid-template-columns` yourself — `u-grid-above` already does. `u-grid-below` is the inverse (stacked above the breakpoint, grid below) — rare.
+Never write `display: grid` or `grid-template-columns` yourself — `u-grid-above` already does. `u-grid-below` is the inverse (stacked above the breakpoint, grid below) — rare. `u-order-unset-above`/`-below` drop a custom `order`, and `u-all-unset-above`/`-below` reset every property, above / below the threshold.
 
-#### Reorder / reset at a threshold
+#### Rules
 
-- `u-order-unset-above` / `u-order-unset-below` — drop a custom `order` above / below the breakpoint
-- `u-all-unset-above` / `u-all-unset-below` — reset every property above / below the breakpoint
-
-#### Everything else
-
-For flex-direction switches, alignment changes, a different column count, or a collapse point other than 62em, write an explicit named threshold query — pick the container matching the breakpoint:
-
-```css
-/* CORRECT — react to container width via the named threshold container */
-@container threshold-medium (width < 48em) {
-  .enterprise_header {
-    flex-direction: column;
-    align-items: start;
-  }
-}
-
-/* WRONG — never @media */
-@media (max-width: 48em) {
-  .enterprise_header {
-    flex-direction: column;
-  }
-}
-```
-
-- Breakpoints always in `em`: large `62em`, medium `48em`, small `30em`
-- Threshold queries react to the nearest **container** width (the `u-container`, which is the column area). For a finer, component-local query you can also use an unnamed `@container (width < Xem)` against the nearest `container-type: inline-size` ancestor — affects its children only
+- **Webflow breakpoints are px** (`991` / `767` / `479`) — the one place px is correct, since they must match Webflow exactly. Sizing/layout *inside* a query still uses `rem`/`em`/`ch`, never px.
+- The grid's container thresholds stay in **em** (`62` / `48` / `30em`); they fall at the same viewport boundaries (992 / 768 / 480px) but react to container width.
+- **Use only these four breakpoints** — don't invent others. To vary a `u-grid-*` column count per breakpoint, set `--_column-count---value` inside a threshold container query (it's part of the grid system); everything else uses the Webflow `@media` breakpoints.
+- For a finer, component-local query, an unnamed `@container (width < Xem)` against the nearest `container-type: inline-size` ancestor still works — but prefer Webflow `@media` for non-grid responsiveness so it imports to the Designer.
 
 ### Trigger & State System
 
@@ -563,10 +566,11 @@ This applies everywhere, not just visual compositions.
 ## Anti-patterns
 
 - `px` anywhere, `vw` for fonts
-- `@media` queries
+- `@media` at non-Webflow breakpoints — only Webflow's four (`991`/`767`/`479px` max-width, plus desktop base) are allowed; never invent custom breakpoints. Feature queries like `@media (hover: none)` are fine
 - `:hover`, `:focus`, or any interactive pseudo-class in CSS — use `data-trigger` and `--_trigger---on`/`--_trigger---off`
 - `.is-active`, `[data-state]`, `[data-trigger]` in CSS selectors
-- The `--_responsive---*` / `--flex-medium` keyword-variable system — removed; use threshold utilities (`u-grid-above`/`u-grid-below`) and named `@container threshold-*` queries
+- The `--_responsive---*` / `--flex-medium` keyword-variable system — removed; use the `u-grid-*` container-query system for the grid and Webflow `@media` breakpoints for everything else
+- Container queries for non-grid responsiveness — those land in a custom embed's CSS on Webflow import (hard to maintain); reserve `@container` for `u-grid-*` and use Webflow `@media` breakpoints elsewhere
 - `@keyframes` with state/trigger selectors
 - Fallback values in `var()`
 - `false`/`off` before `true`/`on` in expressions
