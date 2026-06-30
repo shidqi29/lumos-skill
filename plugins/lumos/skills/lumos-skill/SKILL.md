@@ -54,6 +54,7 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
   </section>
   ```
   _(Webflow only — in vanilla mode there are no inline `<style>`/`<script>` blocks; component CSS goes in `css/styles.css` and component JS in `js/main.js`. Markup, class names, and JS scoping are unchanged — only the location differs.)_
+- **Author every visual style yourself, even when a third-party library ships its own CSS.** If a component uses a library that serves its own stylesheet (sliders, carousels, date pickers, lightboxes, etc.), still write the appearance as your own component CSS rather than relying on the library's served styles. On a Webflow export the library's runtime CSS isn't visible or editable in the Designer — only the styles you author carry over, so the component must look correct from your CSS alone (treat the library's stylesheet as behavior/positioning scaffolding, not the source of the look)
 - No `::before`/`::after` — use a `<div>` with a class
 - No `<em>` tag for italic — use `font-style: italic` in CSS on a `<span>` with a component class
 - Use `<div>` for text elements, not `<span>` — only use `<span>` inside headings (`<h1>`–`<h6>`) or paragraphs (`<p>`)
@@ -161,7 +162,7 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
 - Every element must have a component class — no bare `<span>`, `<div>`, or `<a>` with only a utility class
 - **Reusable UI atoms get one shared class, reused everywhere — not a per-section copy.** Buttons, links, badges, tags, and other small repeated elements are defined **once** as a single shared component class (`button_wrap`, `link_wrap`, `badge_wrap`) and reused across every section — don't restyle the same thing under a fresh `hero_button` / `cta_button` class each time. Express differences as scoped `.is-*` variant combo classes (`.button_wrap.is-small`, `.card_wrap.is-reversed`); the variant must appear in the HTML (Webflow purges unused combos). (Buttons' colour variants are the `.u-button-style-*` mode utilities — see Buttons.) This applies only to small reusable atoms — layout/content components (hero, card, section) stay per-component
 - Interactive elements (`<a>`, `<button>`) that act as component roots must end in `_wrap`
-- **Links and buttons only wrap — they never hold text directly.** The interactive element is the `_wrap`, with a child text `<div>` inside: `<a class="button_wrap"><div class="button_text">Label</div></a>`. Padding/background/border live on `_wrap`; text styling and animation live on `_text`. Exceptions: inline links inside a paragraph stay `<a>text</a>` (can't nest a `<div>` in prose), and a real `<button>` element takes a `<span>` child instead of `<div>` (button content must be inline)
+- **Links and buttons only wrap — they never hold text directly.** The interactive element is the `_wrap`, with a child text `<div>` inside: `<a class="button_wrap"><div class="button_text">Label</div></a>`. Padding, `background-color`, `border`, and `color` live on `_wrap`; the text child **inherits** the color, so `_text` never re-sets it — `_text` carries only text styling (size/weight/letter-spacing) and animation. Exceptions: inline links inside a paragraph stay `<a>text</a>` (can't nest a `<div>` in prose), and a real `<button>` element takes a `<span>` child instead of `<div>` (button content must be inline)
 - Any element containing children with component classes must end in `_wrap`
 - SVG `<path>` and `<line>` elements need their own component class for stroke styling — named as siblings to the SVG, not nested: `enterprise_button_path` not `enterprise_button_svg_path`
 - SVG inside a subcomponent starts a new subcomponent name: `enterprise_button_svg` not `enterprise_button_arrow_svg`
@@ -243,7 +244,8 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
 - Space text vertically with `gap` on the flex `_content` (a spacing variable), or `margin-bottom: var(--_text-style---margin-bottom)` on each text element when `_content` is a block
 - A block `_content` that relies on text margins should have `u-margin-trim` (drops the first child's top / last child's bottom margin); a flex `_content` spaced with `gap` doesn't need it
 - **Headings & paragraphs use the `u-text-style-*` utility directly on the element** for sizing — `<h1 class="hero_title u-text-style-h1">`, `<p class="hero_text u-text-style-main">`. Don't wrap them. (`c-heading`/`c-paragraph` and `u-heading`/`u-text` are reserved for rich-text fields and the Webflow heading/paragraph component — never for direct headings/paragraphs.)
-- **Limit line length with a `u-max-width-*ch` utility** (`u-max-width-20ch` … `u-max-width-80ch`) — never write a `max-width` for text in CSS. Make `_content` a **flex column** spaced with `gap`; **center by adding `u-alignment-center` to `_content`** (it sets `text-align`, `justify-content`, and `align-items` to center) — width-limited text and `u-button-group` then center as flex children:
+- **Limit line length with a `u-max-width-*ch` utility applied directly on the text element** (`u-max-width-20ch` … `u-max-width-80ch`) — `<p class="hero_text u-text-style-small u-max-width-40ch">`. Never write a `max-width` for text in CSS, and **don't introduce a wrapper just to constrain width** — the utility works directly on the heading/paragraph itself, no flex-column child structure needed for the limit
+- **The flex-column `_content` is only for spacing and/or centering multiple stacked text elements — not for the width limit.** When several text elements (and maybe a `u-button-group`) stack, make `_content` a **flex column** spaced with `gap`, and **center by adding `u-alignment-center` to `_content`** (it sets `text-align`, `justify-content`, and `align-items` to center) — the width-limited text then centers as a flex child:
   ```html
   <div class="hero_content u-alignment-center">
     <h1 class="hero_title u-text-style-h2 u-max-width-20ch"></h1>
@@ -257,7 +259,7 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
     gap: var(--_spacing---space--4);
   }
   ```
-  For a left-aligned block, omit `u-alignment-center`. Omit `u-max-width-*ch` when no line limit is wanted
+  For a left-aligned block, omit `u-alignment-center`. Omit `u-max-width-*ch` when no line limit is wanted. A single text element that just needs a line-length cap gets the utility directly — no `_content` wrapper at all
 - Reduced-opacity text: `color: color-mix(in srgb, currentColor 80%, transparent)` — adjust percentage as needed. Never use the `opacity` property to fade text
 
 ### Buttons
@@ -265,6 +267,7 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
 - **Use `<a>` for buttons, not `<button>` — reserve `<button>` for real form submit controls only.** Any button-like element (link, CTA, dropdown toggle, JS-action trigger) is an `<a class="button_wrap">`; only an actual form submit uses `<button type="submit">`. This is why the text-wrapper rule notes `<button>` needs a `<span>` child — that case is rare. A JS-action `<a>` should keep keyboard/focus behavior (it already gets focus styles; add `role`/`aria-*` for non-navigation triggers like dropdowns)
 - **One shared, reusable button class — `button_wrap` — defined once and used for every button on the site.** Don't create per-section button classes (`hero_button`, `cta_button`); reuse `button_wrap` and add `.is-*` variants for differences. No button utility — style on the `button_wrap` class with `data-trigger="hover focus"`
 - Buttons must always include padding — default: `padding: var(--_spacing---space--3) var(--_spacing---space--5)`
+- **All button colors live on `button_wrap`, never on `button_text`.** `background-color`, `color`, and `border` are set on the `_wrap` (see the base CSS below); the `_text` child inherits `color`, so re-declaring it there is redundant and breaks theme/trigger inheritance. `_text` only carries size/weight/letter-spacing
 - Buttons read the **`--_button-style---*` alias** (`background`, `text`, `border`, plus each `*-hover`), which defaults to the primary button theme vars and re-resolves per theme class. Write the `color-mix` trigger declarations **once** on the base; color variants just remap the alias (below) — no need to rewrite the `color-mix`. Always `color-mix(in srgb, …)` (the foundation's color space), `--_trigger---on` first, `--_trigger---off` second:
 - Base (primary):
   ```css
@@ -383,6 +386,8 @@ For flex-direction switches, alignment changes, a different column count, or a c
 ### Trigger & State System
 
 Flips CSS variable values on a parent so children react without descendant selectors.
+
+- **The manager block lives in the foundation global CSS — never per-component.** The `[data-state]` / `[data-trigger]` selectors that flip `--_state---*` / `--_trigger---*` (`.is-active`, the `data-state` listeners, and the hover/focus/mobile `data-trigger` rules) ship in `lumos-foundation.css` in vanilla mode and are part of the Lumos global style in Webflow. Components only **read** the flipped variables; they never redefine the manager. If that block isn't present in the global CSS, `data-state`/`data-trigger`/`.is-active` do nothing — the variables never flip
 
 - `--_state---true: 1` / `--_state---false: 0` → flip when activated (`.is-active`, `data-state` match)
 - `--_trigger---on: 1` / `--_trigger---off: 0` → flip on hover/focus (`data-trigger`)
@@ -590,6 +595,9 @@ This applies everywhere, not just visual compositions.
 - Per-section button/link classes (`hero_button`, `cta_button`) that restyle the same atom — reuse one shared `button_wrap`/`link_wrap` class with `.is-*` variants
 - `<button>` for a link, CTA, or dropdown toggle — use `<a>`; reserve `<button>` for real form submit controls
 - Link/button holding text directly (`<a class="button_wrap">Label</a>`) instead of wrapping a `_text` div — except inline prose links
+- `color` (or `background-color`/`border`) set on `button_text` instead of `button_wrap` — the `_wrap` owns all button colors; the `_text` inherits `color`
+- Constraining text width with a `max-width` in CSS or an extra wrapper instead of `u-max-width-*ch` directly on the text element
+- Relying on a third-party library's served CSS for a component's appearance — author the styles yourself so they export to the Webflow Designer
 - Bare `img` sized directly instead of a relative `_img_wrap` wrapper + absolutely-filled `img`
 - Per-component `text-decoration: none` on links to kill the underline — the foundation already resets `a { text-decoration: none }` (only `a:not([class])` rich-text stays underlined); stripping it link-by-link is whack-a-mole and misses elements like the logo
 - `<style>` not first child or `<script>` not last child inside `_wrap` _(Webflow only — vanilla mode keeps component CSS/JS in `css/styles.css` and `js/main.js`, not inline)_
