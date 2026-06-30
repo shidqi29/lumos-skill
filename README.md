@@ -8,15 +8,16 @@ built from scratch.
 ## What is this?
 
 Lumos is a breakpointless, utility-driven approach to building responsive websites.
-Instead of media queries and hardcoded pixel values, it leans on fluid sizing,
-responsive CSS variables, utility classes (`u-*`), and a strict component naming
-convention.
+Instead of hardcoded pixel values it leans on fluid sizing, container queries,
+utility classes (`u-*`), and a strict component naming convention. (This skill keeps
+the breakpointless `u-grid-*` grid but routes all other responsiveness through
+Webflow's native breakpoints — see the [changelog](CHANGELOG.md) for the rationale.)
 
 This skill packages all of those conventions so Claude follows them automatically.
 When it's active, any layout Claude generates will:
 
 - Use Lumos utility + component class naming (`hero_title u-text-style-h2`)
-- Be **breakpointless** — responsive via CSS variables, never `@media`
+- Stay **breakpointless for the grid** (`u-grid-*` via container queries) and use Webflow's native breakpoints (`@media` at 991 / 767 / 479px) for every other element, so it imports cleanly into the Designer
 - Use design tokens for color, spacing, and typography (no hex codes, no raw `px`)
 - Follow the trigger/state system for hover and interactive states (no `:hover` in CSS)
 - Stay accessible (ARIA roles, keyboard nav, reduced-motion support)
@@ -95,6 +96,7 @@ lumos-skill/
 │                   ├── vanilla-mode.md            # full-page guide for from-scratch builds
 │                   └── webflow-variable-naming.md # naming so vanilla CSS imports as Webflow Variables
 ├── .gitignore
+├── CHANGELOG.md                         # dated history of skill changes (newest first)
 └── README.md
 ```
 
