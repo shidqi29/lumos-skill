@@ -356,31 +356,6 @@ label:has(input:focus-visible) [data-outline] {
   }
 }
 
-/* Webflow native dropdown — structural base so .w-dropdown markup works in a
-   from-scratch project (Webflow's runtime provides this on a real site). The
-   open/close JS lives in js/main.js; see references/webflow-native-dropdown.md.
-   Put all visual styling on your own component classes (+ data-state="open"). */
-.w-dropdown {
-  position: relative;
-  display: inline-block;
-}
-.w-dropdown-toggle {
-  cursor: pointer;
-  user-select: none;
-}
-.w-dropdown-list {
-  position: absolute;
-  min-width: 100%;
-  display: none;
-}
-.w-dropdown-list.w--open {
-  display: block;
-}
-.w-inline-block {
-  max-width: 100%;
-  display: inline-block;
-}
-
 /* ==========================================================================
    2. DESIGN TOKENS  —  REAL :root export from the Webflow project (verbatim).
    Edit brand values via the --swatch--* palette near the bottom.

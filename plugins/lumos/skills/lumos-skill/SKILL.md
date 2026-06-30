@@ -23,7 +23,7 @@ In vanilla mode, the rules tagged _(Webflow only)_ are **dropped** — they exis
 
 - No combo-class-purging workaround. Combo classes may be CSS-only, so the `_hidden u-display-none` placeholder for dynamically-applied combo classes is **not required**. (The hidden-template clone pattern is still recommended for JS-appended markup — it's clean, not a workaround.)
 - No empty-div `padding: 0` fix (Webflow's default element padding doesn't exist).
-- No reliance on `.w-*` runtime classes — **except** the native dropdown (`.w-dropdown`), which is intentionally supported in vanilla via the foundation's base CSS plus a JS init (see Dropdowns and `references/webflow-native-dropdown.md`).
+- No reliance on `.w-*` runtime classes.
 
 When generating a full page, see `references/vanilla-mode.md` for the project skeleton, an HTML boilerplate, token customization, and fidelity notes. The foundation's variable names follow the Webflow Variables import convention so a vanilla project imports back into Webflow as native variables — keep the names intact and follow `references/webflow-variable-naming.md` when adding or customizing tokens.
 
@@ -308,12 +308,9 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
   </div>
   ```
 
-### Dropdowns
+### Dropdowns & menus
 
-- **Use Webflow's native dropdown** (`.w-dropdown` > `.w-dropdown-toggle` + `.w-dropdown-list`) for any dropdown/menu — never hand-roll one. Add your own component classes alongside the `.w-*` classes for styling. Open state is the `.w--open` class; style reactions with `data-state="open"` on the toggle (the state system already listens to `.w--open`) — never select `.w--open` in CSS
-- **Webflow mode**: emit the markup only. Webflow's runtime supplies the base CSS and the open/close/keyboard JS — don't write or include either (the dropdown script ships in `webflow.js` on every Webflow site)
-- **Vanilla mode**: the foundation provides the structural `.w-dropdown` base CSS; add the dropdown init (`initDropdown()`) to `js/main.js` and call it from `initFunction()`. Its JS toggles the native `.w--open` class (the one sanctioned exception to the `.is-active`-only rule) and selects the native `.w-dropdown-*` classes (the component's contract — the exception to the `data-*`-targeting rule)
-- The toggle is a `<div role="button">`, not an `<a>` (it doesn't navigate) — the exception to "use `<a>` for triggers". Full markup, CSS, and the vanilla JS: `references/webflow-native-dropdown.md`
+- Build a dropdown/menu as a normal accessible component (best practice) — **don't use Webflow's native `.w-dropdown`**. One component class per part (wrapper/toggle/list), `data-*` hooks for JS targeting, and toggle the open state with `.is-active` (read in CSS via the trigger/state system). The toggle is an `<a>` (or `<button type="button">`) with `aria-expanded` + `aria-controls`; the menu is a list. Keyboard: Enter/Space toggles, Esc closes, arrows move between items; close on outside click
 
 ### Color & Theming
 
@@ -591,8 +588,7 @@ This applies everywhere, not just visual compositions.
 - Empty divs without `padding: 0` _(Webflow only)_
 - Buttons without padding
 - Per-section button/link classes (`hero_button`, `cta_button`) that restyle the same atom — reuse one shared `button_wrap`/`link_wrap` class with `.is-*` variants
-- `<button>` for a link, CTA, or dropdown toggle — use `<a>`; reserve `<button>` for real form submit controls (the dropdown toggle is the exception: a native `<div role="button">`)
-- Hand-rolled dropdown instead of Webflow's native `.w-dropdown` structure; or shipping the dropdown JS in a Webflow export (Webflow's runtime already provides it)
+- `<button>` for a link, CTA, or dropdown toggle — use `<a>`; reserve `<button>` for real form submit controls
 - Link/button holding text directly (`<a class="button_wrap">Label</a>`) instead of wrapping a `_text` div — except inline prose links
 - Bare `img` sized directly instead of a relative `_img_wrap` wrapper + absolutely-filled `img`
 - Per-component `text-decoration: none` on links to kill the underline — the foundation already resets `a { text-decoration: none }` (only `a:not([class])` rich-text stays underlined); stripping it link-by-link is whack-a-mole and misses elements like the logo
