@@ -212,7 +212,7 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
 
 ### Layout
 
-- Grids use `u-grid-above` (or `u-grid-below`) on the `_layout` div — the utility provides `display: grid`, the `--site--gutter` gutters, and `flex-flow: column`. Set the column count with `--_column-count---value` on the combo class (`.hero_layout.u-grid-above { --_column-count---value: 12; }`); override `grid-column-gap`/`grid-row-gap` there if needed. Don't write `display: grid` or `grid-template-columns` by hand
+- Grids use `u-grid-above` (or `u-grid-below`) on the `_layout` div — the utility provides `display: grid`, the `--site--gutter` gutters, and `flex-flow: column`. Set the column count with `--_column-count---value` on the combo class (`.hero_layout.u-grid-above { --_column-count---value: 12; }`); override `grid-column-gap`/`grid-row-gap` there if needed. Don't write `display: grid` or `grid-template-columns` by hand. (The page default is 12, set on `page_wrap`; the base mode is 1. Setting the value per component registers that number as a column-count mode on a Webflow import.)
 - Grid columns: always `minmax(0, 1fr)` — never bare `1fr`: `repeat(2, minmax(0, 1fr))` not `1fr 1fr`
 - `grid-column-end: span 5` not `grid-column-end: 6`. Both: `grid-column: 1 / span 5`
 - If you ever set `display: grid` manually (outside `u-grid-*`), it must also have `flex-direction: column` so it stacks when collapsed — but prefer `u-grid-above`/`u-grid-below`, which already include this

@@ -48,8 +48,8 @@ body {
    wraps everything in a <div> that inherits the body's class — any style on the
    bare `body` selector is therefore lost on import. Put every body-level style on
    this class instead, and emit <body class="page_wrap"> (it becomes
-   <div class="page_wrap"> after import). It also hosts the threshold-* responsive
-   containers, so they survive too. */
+   <div class="page_wrap"> after import). It also sets the page default for
+   column-count (12); the threshold-* responsive containers live on u-container. */
 .page_wrap {
   min-height: 100vh;
   background-color: var(--_theme---background);
@@ -2604,7 +2604,8 @@ label:has(input:focus-visible) [data-outline] {
    gutters, and column direction — components only set the column count (and any gap
    override) on the combo class, e.g.:
      .why_list.u-grid-above { --_column-count---value: 3; }
-   The threshold @container rules below flip these to a vertical flex stack past the
+   The page default is 12 (set on .page_wrap); the base mode is 1 (:root). The
+   threshold @container rules below flip these to a vertical flex stack past the
    breakpoint (u-grid-above collapses below it, u-grid-below collapses above it). */
 .u-grid-above,
 .u-grid-below {

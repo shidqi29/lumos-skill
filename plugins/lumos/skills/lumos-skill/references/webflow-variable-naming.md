@@ -66,7 +66,7 @@ Rules:
 
 - **Default mode** = the values defined in `:root` / `html` / `body` (e.g. theme→Light, button-style→Primary, trigger→Base).
 - **An override must DIFFER from the base.** A mode whose values equal the base is skipped and won't register.
-- **Value-as-mode:** a collection set to a plain number per component — e.g. `.hero_layout.u-grid-above { --_column-count---value: 3; }` — makes the number the mode name.
+- **Value-as-mode:** a collection set to a plain number per component — e.g. `.hero_layout.u-grid-above { --_column-count---value: 3; }` — makes the number the mode name. The **column-count** collection works this way: base mode is 1 (`:root`), the page default is 12 (set on `.page_wrap`), and writing `--_column-count---value: N` on a component registers mode "N" — no utility class.
 - **Put the mode class on a real element** so the binding is emitted and not pruned on import — `u-theme-*` on the section, `u-text-style-*` on the text, `u-button-style-*` on the button, `u-gap-*` on the flex/grid container, `u-alignment-*` on the content wrapper. A mode whose class never appears in the HTML won't import. (The `u-trigger-active`/`u-state-active` modes ride on the runtime state-manager rules rather than a static element — verify they survive a real import.)
 
 ## Reference & raw
