@@ -7,6 +7,16 @@ date, changes are grouped as **Added**, **Changed**, **Removed**, or **Fixed**.
 When a change ships, add it under today's date (create the date heading if it's the
 first change of the day).
 
+## 2026-07-01
+
+### Added
+
+- **Alt text is now mandatory for every image and asset.** Every `<img>` must carry an `alt` attribute — descriptive for meaningful images, empty `alt=""` + `aria-hidden="true"` for decorative ones. Meaningful inline SVGs/videos need an accessible name too. Added as an Output rule and an anti-pattern; the image-wrapper example no longer ships a placeholder `alt="..."`.
+
+### Fixed
+
+- **State manager now truly complete in `lumos-foundation.css`.** Added the two missing canonical Lumos trigger selectors: `.wf-design-mode [data-trigger~="preview"]` (the documented `preview` trigger was previously inert — the selector activating it was absent) and `[data-trigger~="hover-if-clickable"]`. Documented both trigger types in the Trigger & State System section.
+
 ## 2026-06-30
 
 ### Added

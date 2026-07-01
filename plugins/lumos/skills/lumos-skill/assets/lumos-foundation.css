@@ -328,6 +328,7 @@ label:has(input:focus-visible) [data-outline] {
   --_state---false: 1;
 }
 .u-trigger-active,
+.wf-design-mode [data-trigger~="preview"],
 [data-trigger~="focus"]:is(:focus-visible, :has(:focus-visible)),
 [data-trigger~="group"]:has(
     [data-trigger~="focus-other"]:focus-visible,
@@ -339,6 +340,9 @@ label:has(input:focus-visible) [data-outline] {
 }
 @media (hover: hover) {
   [data-trigger~="hover"]:hover,
+  [data-trigger~="hover-if-clickable"]:has(
+      .clickable_wrap:not(.w-condition-invisible)
+    ):hover,
   [data-trigger~="group"]:has([data-trigger~="hover-other"]:hover)
     [data-trigger~="hover-other"]:not(:hover) {
     --_trigger---on: 0;

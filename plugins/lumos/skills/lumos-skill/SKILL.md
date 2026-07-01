@@ -64,10 +64,11 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
 - `var(--border-width--main)` for all border widths
 - Always use `--_theme---*` variables for colors. When a design specifies a color outside the theme system, map it to the closest theme variable. **Never use hex codes anywhere — not in CSS, comments, or explanatory text.** Don't tell the user to map hex values — just use the closest `--_theme---*` variable directly
 - `img`/`video` default to `object-fit: cover` (foundation) — don't re-add `object-fit`. Don't size a bare `img`; use the image-wrapper pattern below
+- **Every image and asset needs alt text.** Every `<img>` must carry an `alt` attribute — descriptive alt for meaningful images (`alt="Team reviewing analytics dashboard"`), empty `alt=""` **plus** `aria-hidden="true"` for purely decorative ones. Never omit `alt` or leave a placeholder like `alt="..."` in real output. Other assets that convey meaning need an accessible name too: a meaningful inline SVG gets a `<title>` or `aria-label` (decorative SVGs get `aria-hidden="true"` — see Class Naming); a `<video>` needs a text alternative (caption/label). The `_img_wrap` pattern's `<img>` still owns the `alt`
 - **Images use a relative wrapper + an absolutely-filled `img`.** Put the `<img>` in a `_img_wrap` div that defines the box (`position: relative` + an `aspect-ratio`, or sized by the layout); the `<img>` fills it with `position: absolute; width: 100%; height: 100%` (object-fit cover is already the default). The skeleton loading color goes on the wrapper:
   ```html
   <div class="hero_img_wrap">
-    <img class="hero_img" src="..." alt="..." loading="lazy" />
+    <img class="hero_img" src="..." alt="Descriptive text for the image" loading="lazy" />
   </div>
   ```
   ```css
@@ -398,7 +399,7 @@ Flips CSS variable values on a parent so children react without descendant selec
 - **Shown by default, hidden when active** → `var(--_state---true)`
 - `data-state` listeners: `checked` (`:checked`), `current` (`.w--current`), `open` (`.w--open`), `pressed` (`aria-pressed`), `expanded` (`aria-expanded`), `external` (`target="_blank"`)
 - JS-driven interactives (tabs, sliders, accordions): toggle `.is-active`, not `data-state`
-- `data-trigger` types: `hover`, `focus`, `preview`, `mobile`, `group`, `hover-other`, `focus-other`
+- `data-trigger` types: `hover`, `focus`, `preview` (forces the "on" state in the Webflow Designer preview so you can style it), `mobile`, `group`, `hover-other`, `focus-other`, `hover-if-clickable`
 - **Never select `[data-state]`, `[data-trigger]`, or `.is-active` in CSS** — read variable values only:
 
   ```css
@@ -604,6 +605,7 @@ This applies everywhere, not just visual compositions.
 - Constraining text width with a `max-width` in CSS or an extra wrapper instead of `u-max-width-*ch` directly on the text element
 - Relying on a third-party library's served CSS for a component's appearance — author the styles yourself so they export to the Webflow Designer
 - Bare `img` sized directly instead of a relative `_img_wrap` wrapper + absolutely-filled `img`
+- `<img>` missing an `alt` attribute, or shipping a placeholder `alt="..."` — every image needs real alt text (descriptive, or empty `alt=""` + `aria-hidden="true"` for decorative); other meaningful assets need an accessible name too
 - Per-component `text-decoration: none` on links to kill the underline — the foundation already resets `a { text-decoration: none }` (only `a:not([class])` rich-text stays underlined); stripping it link-by-link is whack-a-mole and misses elements like the logo
 - `<style>` not first child or `<script>` not last child inside `_wrap` _(Webflow only — vanilla mode keeps component CSS/JS in `css/styles.css` and `js/main.js`, not inline)_
 - Percentage values on `top`/`left`/`bottom`/`right` for positioning — use corner anchors with `0` and `transform` in `em`
