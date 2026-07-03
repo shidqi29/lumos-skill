@@ -7,10 +7,25 @@ date, changes are grouped as **Added**, **Changed**, **Removed**, or **Fixed**.
 When a change ships, add it under today's date (create the date heading if it's the
 first change of the day).
 
-## 2026-07-02
+## 2026-07-03
+
+### Added
+
+- **Combo-scoping systematic audit.** New guidance to check every component class that co-occurs with a utility for ANY overlapping property, not just the visually-obvious one — with a three-way decision (genuinely differs → scope; identical value → delete the redundant bare declaration; stray hardcoded value duplicating a utility's job → delete entirely). Plus a gotcha: scoping a base rule to a combo also requires re-scoping its `@media` overrides to the same combo, or the breakpoint silently stops firing.
+- **Webflow-import combo-chain rule (Buttons).** A one-off button/component combo selector must include the full class chain in order (base + utility-mode + custom combo) — skipping the utility-mode class in the middle beats the utility in the browser but isn't recognized by the HTML-to-Webflow import tool, silently dropping the style on import.
+- **Asymmetric grid layouts** (8/4, 7/5, 9/3, …) — use a 12-column `u-grid-above` + `grid-column: span N` per child, not a forced 2-column grid. Stacks automatically below the collapse threshold since flex ignores `grid-column`.
+- **Fixed-count list/card groups** should size by content (`height: auto`), not a fixed height + `flex: 1 0 0` children (which can collapse/vanish on reflow at narrower widths).
+- **`aspect-ratio` must be paired with an explicit `width` or `height`** — Safari doesn't compute it correctly otherwise (Chrome/Firefox tolerate it).
+- **`[data-svg-stroke]` / `[data-svg-fill]` foundation attribute helpers** — shared default stroke/fill treatment for icons, replacing a repetitive one-line CSS rule per icon that just wants the standard look.
+- **`[hidden]` vs `display` specificity gotcha** (Trigger & State) — a component's own `display` declaration can beat the native `hidden` attribute's `display: none` at equal specificity; scope as `.component[hidden]` or drive show/hide through the state system instead.
+- **Multi-page vanilla projects** (`references/vanilla-mode.md`): a new section covering the shared `global/` folder (foundation + shared components, linked by every page before that page's own styles) and per-page-named JS entry functions (`initHomeFunction`, not a generic `initFunction` repeated in every page).
+- **State manager Webflow custom-code requirement** (`references/vanilla-mode.md`): the Trigger & State manager block doesn't survive the HTML-to-Webflow import as native global CSS — it must be pasted into Site Settings → Custom Code → Head once per site, or every `data-trigger`/`data-state`/`.is-active` goes inert post-import.
+- **Motion tokens in the foundation** (`--ease-default`, `--duration-default`) — one shared easing/duration so transitions feel consistent project-to-project.
+- **Third-party-library principle strengthened** (Output): rename and self-author EVERY class hook a library touches, not just the top-level/slide classes — check the library's config API for a rename option per hook (disabled/locked states, dynamically-injected sub-elements, etc.) and confirm zero of the library's own class names remain as CSS selectors.
 
 ### Fixed
 
+- **Motion/duration token naming corrected.** `references/webflow-variable-naming.md` previously listed `200ms` as a safe "Size" type value; in practice a `transition-timing-function` has no representable Webflow Variable type at all, and a plain reusable duration doesn't reliably import as a usable Size variable either. Both must use plain single-dash naming (`--ease-default`, not `--ease--default`) so the import tool leaves them as custom CSS instead of attempting a Variable it can't correctly represent.
 - **Trigger/State: clarified the resting-value semantics.** The token defaults (`--_trigger---on: 1`, `--_state---true: 1`) are the RESTING values — the manager flips them on hover/activation. Added an explicit note that in `color-mix(A·on, B·off)` the **first term is the resting look and the second applies on hover/active** (matching the button base: `background` first, `background-hover` second), so the defaults aren't misread as "the value when active" (which inverts hover/rest).
 
 ### Changed

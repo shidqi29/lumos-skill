@@ -94,6 +94,53 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 ```
 
+## Multi-page projects
+
+The single-page skeleton above generalizes directly, with two changes once a project grows past one HTML file.
+
+**One shared `global/` folder, never a per-page copy of the foundation or shared components:**
+
+```
+project/
+├── global/
+│   ├── lumos-foundation.css   ← ONE copy, shared by every page
+│   └── global.css             ← shared components: header, footer, buttons, anything
+│                                  reused across pages — linked by every page, second
+├── home/
+│   ├── index.html
+│   ├── css/styles.css         ← Home's unique sections ONLY
+│   └── js/main.js
+├── about/
+│   ├── index.html
+│   ├── css/styles.css         ← About's unique sections ONLY
+│   └── js/main.js
+└── …
+```
+
+Every page's `<head>` links in this order — foundation, then shared components, then that page's own unique styles:
+
+```html
+<link rel="stylesheet" href="../global/lumos-foundation.css" />
+<link rel="stylesheet" href="../global/global.css" />
+<link rel="stylesheet" href="css/styles.css" />
+```
+
+A component used on more than one page (header, footer, buttons, a shared CTA banner) is styled **once** in `global.css` — never copy its rules into each page's own `styles.css`. A page's own `styles.css` holds only the sections unique to that page. This is the same "never redefine what's already provided" discipline the skill applies to the foundation itself, extended to shared components across pages.
+
+**Name each page's entry function for that page, not a generic `initFunction`.** Each page still has exactly one entry point called once on `DOMContentLoaded` (the "One entry point" JS rule is unchanged — nothing shares across pages, since each page loads its own separate `main.js`), but name it for the page: `initHomeFunction`, `initAboutFunction`, not a bare `initFunction` repeated identically in every page's file. This makes it unambiguous which page's script you're looking at when several pages' files are open side by side, and avoids an identical top-level name across files that could otherwise be confused if scripts were ever bundled or compared:
+
+```js
+// about/js/main.js
+const initAboutFunction = () => {
+  initHeaderWrap();
+  initFoundersWrap();
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+  initAboutFunction();
+});
+```
+
 ## The page wrapper (`page_wrap`)
 
 Webflow can't paste a `<body>` tag — the HTML-to-Webflow import tool wraps the page in a `<div>` that inherits the body's class, so anything styled on the bare `body` selector is lost. Because of that, **all body-level styling lives on the `.page_wrap` class** in the foundation, never on `body`:
@@ -138,6 +185,8 @@ A vanilla project built this way can be imported into Webflow with the HTML-to-W
 - `.u-<collection-slug>-<mode>` classes (`u-theme-dark`, `u-text-style-h2`) → **variable modes**; defaults come from `:root`/`html`/`body`, and an override only registers if it differs from the base
 
 So: don't rename collections, don't inline hardcoded values where a token exists, and keep applying the `u-theme-*` / `u-text-style-*` mode classes on real elements (a mode class absent from the HTML gets pruned on import). New tokens must use the same naming to import. Full rules and checklist: `references/webflow-variable-naming.md`.
+
+**The Trigger & State manager block does not survive the import as native Webflow global CSS — it must be pasted back in as custom code, or every `data-trigger`/`data-state`/`.is-active` in the imported project goes silently inert.** The manager (the `[data-state]`/`[data-trigger]` selectors that flip `--_state---*`/`--_trigger---*`) lives in `lumos-foundation.css`, but the HTML-to-Webflow import brings across component styles, not this file wholesale as Webflow's own equivalent global stylesheet — a freshly-imported Webflow site has no page where that block already exists unless the site was already a Lumos project before the import. After importing, paste the manager block into that Webflow site's **Site Settings → Custom Code → Head** (its selectors are too complex for the Designer's style panel to author natively). Do this once per site, not per page. Until it's pasted in, hover/focus/active states will look completely static in the published site even though everything renders correctly in the Designer's own preview only after a real publish with the custom code in place.
 
 ## Fidelity notes
 

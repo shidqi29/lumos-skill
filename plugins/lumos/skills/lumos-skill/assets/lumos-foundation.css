@@ -648,6 +648,14 @@ label:has(input:focus-visible) [data-outline] {
   --radius--main: 1rem;
   --radius--round: 100vw;
   --border-width--main: 0.094rem;
+  /* Motion — one shared easing + duration so every transition across a project feels
+     the same. Use as: transition: all var(--duration-default) var(--ease-default);
+     Naming is deliberately single-dash (not --ease--default): a transition-timing-
+     function and a plain motion duration have no representable Webflow Variable type,
+     so the collection-naming convention must NOT be used here — see
+     references/webflow-variable-naming.md. Don't "fix" these to --x--y. */
+  --ease-default: cubic-bezier(0.7, 0, 0.3, 1);
+  --duration-default: 300ms;
   --_theme---border: var(--swatch--dark-900-o20);
   --swatch--transparent: transparent;
   --_trigger---on: 1;
@@ -2553,6 +2561,24 @@ label:has(input:focus-visible) [data-outline] {
   height: 100%;
   display: block;
   overflow: visible !important;
+}
+/* Shared default stroke treatment for icons — put data-svg-stroke on the <svg> (covers
+   every <path> inside) or on a single <path> when only one needs it. Replaces writing
+   `stroke: currentColor; stroke-width: var(--border-width--main); fill: none;` as a new
+   one-line rule for every icon component that just wants the standard look. Color comes
+   from `color` on the icon's own component class (currentColor inherits it); thickness
+   is overridable per-icon via --svg-stroke-width. Icons still keep their own component
+   class for anything that needs real per-icon customizing — this only removes the
+   repetitive default-stroke declaration. */
+[data-svg-stroke],
+[data-svg-stroke] path {
+  stroke: currentColor;
+  stroke-width: var(--svg-stroke-width, var(--border-width--main));
+  fill: none;
+}
+[data-svg-fill],
+[data-svg-fill] path {
+  fill: currentColor;
 }
 .u-visual-wrap {
   z-index: 1;
