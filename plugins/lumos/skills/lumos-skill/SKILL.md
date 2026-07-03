@@ -300,6 +300,7 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
     padding: var(--_spacing---space--2) var(--_spacing---space--4);
   }
   ```
+- **Pick a button style with contrast against the SECTION's theme.** The style modes are theme-relative: in the light theme `u-button-style-tertiary` / `-quaternary` resolve to white background + white border + white text (they exist for dark sections) — on a light section they're invisible. For an outline button on a light section use `u-button-style-secondary` (transparent background + theme border + theme text). Always sanity-check each button's contrast against the theme of the section it sits in.
 - Usage — reuse the same class, vary with combos, inside the `u-button-group`:
   ```html
   <div class="hero_actions u-button-group">
@@ -395,6 +396,7 @@ Flips CSS variable values on a parent so children react without descendant selec
 
 - `--_state---true: 1` / `--_state---false: 0` → flip when activated (`.is-active`, `data-state` match)
 - `--_trigger---on: 1` / `--_trigger---off: 0` → flip on hover/focus (`data-trigger`)
+- **These are the RESTING values; the manager flips them when active/hovered.** At rest `on`/`true` = 1 and `off`/`false` = 0 — so in `color-mix(A calc(100% * var(--_trigger---on)), B calc(100% * var(--_trigger---off)))` the **first term (A) is the resting appearance and the second (B) applies on hover/active** (the button base sets `--_button-style---background` first = rest, `--_button-style---background-hover` second = hover). For state likewise: the active look is multiplied by `--_state---false`, the resting look by `--_state---true`. Don't misread the defaults as "the value when active" — that inverts hover/rest.
 - **Hidden by default, shown when active** → `var(--_state---false)`
 - **Shown by default, hidden when active** → `var(--_state---true)`
 - `data-state` listeners: `checked` (`:checked`), `current` (`.w--current`), `open` (`.w--open`), `pressed` (`aria-pressed`), `expanded` (`aria-expanded`), `external` (`target="_blank"`)

@@ -7,6 +7,16 @@ date, changes are grouped as **Added**, **Changed**, **Removed**, or **Fixed**.
 When a change ships, add it under today's date (create the date heading if it's the
 first change of the day).
 
+## 2026-07-02
+
+### Fixed
+
+- **Trigger/State: clarified the resting-value semantics.** The token defaults (`--_trigger---on: 1`, `--_state---true: 1`) are the RESTING values — the manager flips them on hover/activation. Added an explicit note that in `color-mix(A·on, B·off)` the **first term is the resting look and the second applies on hover/active** (matching the button base: `background` first, `background-hover` second), so the defaults aren't misread as "the value when active" (which inverts hover/rest).
+
+### Changed
+
+- **Buttons: choose a style mode with contrast against the section theme.** Documented that the style modes are theme-relative — in the light theme `u-button-style-tertiary`/`-quaternary` are white-on-white (they exist for dark sections); use `u-button-style-secondary` for an outline button on a light section. Sanity-check each button against its section's theme.
+
 ## 2026-07-01
 
 ### Added
