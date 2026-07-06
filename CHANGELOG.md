@@ -7,6 +7,12 @@ date, changes are grouped as **Added**, **Changed**, **Removed**, or **Fixed**.
 When a change ships, add it under today's date (create the date heading if it's the
 first change of the day).
 
+## 2026-07-06
+
+### Added
+
+- **`flex: 1` vs `height: 100%` for filling a `min-height` parent** (Layout) — a flex child needing to fill its parent should use `flex: 1`/`.u-flex-grow`, not `height: 100%`, whenever the parent's height comes from `min-height` (the 100svh full-bleed hero is the common case). `min-height` only sets a floor and the box can grow taller if content needs it, so it isn't a definite height a percentage reliably resolves against — `flex: 1` fills the flex container's actual available space regardless of how that height was established. Distilled from ENEX Bonn (2026-07-06).
+
 ## 2026-07-03
 
 ### Added
