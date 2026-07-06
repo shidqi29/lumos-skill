@@ -649,13 +649,9 @@ label:has(input:focus-visible) [data-outline] {
   --radius--round: 100vw;
   --border-width--main: 0.094rem;
   /* Motion — one shared easing + duration so every transition across a project feels
-     the same. Use as: transition: all var(--duration-default) var(--ease-default);
-     Naming is deliberately single-dash (not --ease--default): a transition-timing-
-     function and a plain motion duration have no representable Webflow Variable type,
-     so the collection-naming convention must NOT be used here — see
-     references/webflow-variable-naming.md. Don't "fix" these to --x--y. */
-  --ease-default: cubic-bezier(0.7, 0, 0.3, 1);
-  --duration-default: 300ms;
+     the same. Use as: transition: all var(--duration--default) var(--ease--default); */
+  --ease--default: cubic-bezier(0.7, 0, 0.3, 1);
+  --duration--default: 300ms;
   --_theme---border: var(--swatch--dark-900-o20);
   --swatch--transparent: transparent;
   --_trigger---on: 1;

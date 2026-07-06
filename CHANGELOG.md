@@ -12,6 +12,11 @@ first change of the day).
 ### Added
 
 - **`flex: 1` vs `height: 100%` for filling a `min-height` parent** (Layout) — a flex child needing to fill its parent should use `flex: 1`/`.u-flex-grow`, not `height: 100%`, whenever the parent's height comes from `min-height` (the 100svh full-bleed hero is the common case). `min-height` only sets a floor and the box can grow taller if content needs it, so it isn't a definite height a percentage reliably resolves against — `flex: 1` fills the flex container's actual available space regardless of how that height was established. Distilled from ENEX Bonn (2026-07-06).
+- **Vanilla-mode token overrides: same name, not a parallel prefix** (`references/vanilla-mode.md`) — when a project's real value differs from the foundation's placeholder default, redeclare the *same* custom property (section 2 already loads after the defaults) instead of adding a project-prefixed variant name alongside the untouched original. A parallel namespace leaves two font-size/spacing scales in the same file with no signal which one components should actually use. Distilled from Stadtform (2026-07-06) — a `sf-` prefix had crept across nearly every token in section 2, including ones that turned out to be exact-value duplicates of existing defaults.
+
+### Fixed
+
+- **Reverted the 2026-07-03 single-dash decision for `--ease-default`/`--duration-default`.** That entry called single-dash naming deliberate so the Webflow import tool wouldn't attempt to represent a transition-timing-function/duration as a Variable it has no type for. Real-world use in Stadtform (2026-07-06) settled on double-dash (`--ease--default`, `--duration--default`) instead. Foundation and any project still on the single-dash names should move to double-dash.
 
 ## 2026-07-03
 
