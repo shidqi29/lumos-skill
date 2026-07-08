@@ -7,6 +7,17 @@ date, changes are grouped as **Added**, **Changed**, **Removed**, or **Fixed**.
 When a change ships, add it under today's date (create the date heading if it's the
 first change of the day).
 
+## 2026-07-08
+
+### Added
+
+- **Text-style collection is capped at 12 modes** (Typography) — Webflow limits a variable collection's modes, and each `u-text-style-*` class = one mode on import, so the foundation ships exactly the canonical 12 (`display`, `h1`–`h6`, `large`, `medium`, `main`, `small`, `tiny`) and you must never add a 13th. A design with >12 distinct sizes maps onto the 12 by pixel size (rename, don't add); off-scale one-offs stay component-CSS `rem` (no mode). From Stadtform (a foundation had grown to 15 text styles → broke a clean Webflow import).
+- **Grid-first layout is now stated as a hard default** (Layout) — every real multi-column layout is `u-grid-above` + column-spans, never `display:flex`+`flex:1`/fixed `rem` widths; keep flex only for visual compositions, compact positioned groups, single-child centering, form-field rows, and non-collapsing label|value tables. Also spells out the mechanical swap (drop `flex:1`, add `width:100%`, delete the `@media flex-flow:column`). From Stadtform grid-first refactor (operator directive).
+
+### Changed
+
+- **Foundation customization: no duplicate variables** (Modes §Vanilla, point 4) — customize by editing the placeholder token value in-place; never leave the same variable defined twice with different values (a second override `:root` block that redefines a foundation token is a bug — last wins, dead placeholder confuses editors, imports ambiguously). Overwrite the placeholder or make a genuinely new name. From Stadtform (foundation had 23 vars defined twice with conflicting values).
+
 ## 2026-07-06
 
 ### Added
