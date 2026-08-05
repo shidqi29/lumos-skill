@@ -7,6 +7,13 @@ date, changes are grouped as **Added**, **Changed**, **Removed**, or **Fixed**.
 When a change ships, add it under today's date (create the date heading if it's the
 first change of the day).
 
+## 2026-08-05
+
+### Added
+
+- **`flex-flow: wrap`, never `flex-flow: row wrap`** (Output + Anti-patterns) — `row` is already the initial `flex-direction`, so the two-value form only restates the default while reading as a deliberate direction change, and on a Webflow import it lands as an explicit direction setting rather than the plain "wrap children" toggle the Designer exposes. `flex-flow: column wrap` stays valid (there `column` is real information), as do the direction-only `flex-flow: row` / `flex-flow: column`. DoD sweep: `grep -n 'flex-flow: row wrap'` must return nothing. Operator directive (Shidqi, Qubes & Co slicing).
+- **State combos belong on the BASE class, not stacked on a variant combo** (Class Naming + Anti-patterns) — when a component already carries variant combos (`.card_wrap.is-1`, `.is-2`, `.is-3`), write the active state once against the base as `.card_wrap.is-active` so it covers every variant automatically. Authoring `.card_wrap.is-1.is-active`, `.card_wrap.is-2.is-active`, … means one combo per variant to build and maintain in the Designer (plus a `_hidden` placeholder each), silently misses any variant you forget, and breaks when the item count changes. Corollary: JS toggles `.is-active` on the element carrying the base class — that element is the state root, and its children read `var(--_state---*)` instead of getting their own `.is-active`. Operator directive (Shidqi, Qubes & Co slicing).
+
 ## 2026-07-08
 
 ### Added

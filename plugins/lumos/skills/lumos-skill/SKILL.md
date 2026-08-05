@@ -92,6 +92,7 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
 - Input elements must have `font-size` no smaller than `1rem` — below `1rem` triggers auto-zoom on iOS
 - SVGs get their own component class. Stroke attributes in CSS, not inline. `stroke-width: var(--border-width--main)`. `stroke: currentColor`
 - **For icons that just need the standard stroke treatment, use the foundation's `[data-svg-stroke]` attribute instead of writing a one-line stroke rule per icon.** Writing `.icon_name_path { stroke: currentColor; stroke-width: var(--border-width--main); fill: none; }` for every single icon component (arrows, chevrons, nav glyphs, …) is pure repetition when they all resolve to the same declaration. Put `data-svg-stroke` on the `<svg>` (covers every `<path>` inside) or on one `<path>` directly; color comes from `color` on the icon's own component class (`currentColor` inherits the section/button color automatically — set `color` explicitly only when an icon needs to diverge, e.g. an inverted badge). The icon still keeps its own component class for anything that DOES need per-icon customizing (size, a non-standard stroke-width via `--svg-stroke-width`); the attribute only replaces the repetitive default-stroke rule, not the class
+- **To wrap in the default row direction, write `flex-flow: wrap` — never `flex-flow: row wrap`.** `row` is already the initial `flex-direction`, so the two-value form only restates the default while making the declaration read as a deliberate direction change; on a Webflow import it lands as an explicit direction setting instead of the plain "wrap children" toggle the Designer exposes. Single value, wrap only. The two-value form is correct **only when the direction genuinely isn't `row`** — `flex-flow: column wrap` stays, because `column` there is real information. Same for the nowrap cases: `flex-flow: row` / `flex-flow: column` set direction alone. Sweep before DoD: `grep -n 'flex-flow: row wrap'` must return nothing
 - Respect `prefers-reduced-motion` for complex animations — not needed for simple CSS transitions
 - Accessibility: tabs need `role="tablist"`, `role="tab"`, `role="tabpanel"`, `aria-controls`, `aria-selected`, `aria-labelledby`. Accordions need `aria-expanded`, `aria-controls`. Keyboard nav (`Enter`, `Space`, arrows). Screen reader–only text: use `u-sr-only` class
 
@@ -165,6 +166,17 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
 - Hyphens only for multi-word parts: `tabs_link_wrap` not `tabs_link-wrap`
 - Utilities: `u-` prefix. Combo classes: `.is-reversed`, `.is-1`, `.is-active`
 - Combo classes always scoped: `.hero_card_wrap.is-reversed { }` not `.is-reversed { }`
+- **State combos (`.is-active` and anything like it) belong on the BASE class — never stacked on top of a variant combo.** When a component already carries positional/variant combos (`.card_wrap.is-1`, `.card_wrap.is-2`, `.card_wrap.is-3`), the active state is written **once** against the base — `.card_wrap.is-active` — so it applies to every variant automatically. Don't author `.card_wrap.is-1.is-active`, `.card_wrap.is-2.is-active`, … : that's one combo per variant to build and maintain in the Designer (and one `_hidden` placeholder each), it silently misses any variant you forget, and it breaks the moment the item count changes. Same rule in the Designer: create the `is-active` combo on the base class, not on `base + is-2`. This is also why JS must toggle `.is-active` on the element carrying the base class — the state root is the base element, and its children read `var(--_state---*)` rather than getting their own `.is-active`
+  ```css
+  /* CORRECT — one rule, every variant covered */
+  .card_wrap.is-active { … }
+  .card_wrap.is-1 { … }   /* variant = position only */
+  .card_wrap.is-2 { … }
+
+  /* WRONG — state duplicated per variant */
+  .card_wrap.is-1.is-active { … }
+  .card_wrap.is-2.is-active { … }
+  ```
 - Combo classes must exist in the HTML — Webflow removes unused classes. If a combo class is only applied dynamically (e.g. JS toggling `.is-active`) **and has CSS styles defined for it** (e.g. `.tabs_link_wrap.is-active { ... }`), place an element with it inside a `[component]_hidden u-display-none` div. If the combo class has no CSS (JS only uses it for querying/targeting), no `_hidden` placeholder is needed. If a `_hidden` div already exists (for clone templates), reuse it _(Webflow only — in vanilla mode CSS-only combo classes are fine and need no `_hidden` placeholder)_
 - Every element must have a component class — no bare `<span>`, `<div>`, or `<a>` with only a utility class
 - **Reusable UI atoms get one shared class, reused everywhere — not a per-section copy.** Buttons, links, badges, tags, and other small repeated elements are defined **once** as a single shared component class (`button_wrap`, `link_wrap`, `badge_wrap`) and reused across every section — don't restyle the same thing under a fresh `hero_button` / `cta_button` class each time. Express differences as scoped `.is-*` variant combo classes (`.button_wrap.is-small`, `.card_wrap.is-reversed`); the variant must appear in the HTML (Webflow purges unused combos). (Buttons' colour variants are the `.u-button-style-*` mode utilities — see Buttons.) This applies only to small reusable atoms — layout/content components (hero, card, section) stay per-component
@@ -592,6 +604,8 @@ This applies everywhere, not just visual compositions.
 - Fallback values in `var()`
 - `false`/`off` before `true`/`on` in expressions
 - Unscoped combo classes
+- `flex-flow: row wrap` — `row` is the default direction; write `flex-flow: wrap`. (`column wrap` is fine — `column` is real information)
+- A state combo stacked on a variant combo (`.card_wrap.is-2.is-active`) instead of written once on the base (`.card_wrap.is-active`)
 - Bare `.component { }` CSS for an element that also has a utility class — scope it as the combo `.component.u-utility` so the component's declarations win over the utility
 - Grid columns with bare `1fr` — always `minmax(0, 1fr)`
 - `display: grid` or layout on `u-container` — use a child `_layout` div
