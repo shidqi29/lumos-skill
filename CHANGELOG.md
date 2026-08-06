@@ -7,6 +7,13 @@ date, changes are grouped as **Added**, **Changed**, **Removed**, or **Fixed**.
 When a change ships, add it under today's date (create the date heading if it's the
 first change of the day).
 
+## 2026-08-06
+
+### Added
+
+- **A library's `overflow: hidden` root is also its min-content reset** (Output §third-party libraries + Anti-patterns) — a scroll container's min-content size is `0`, and that zero is what stops N non-shrinking `width: 100%` slides from contributing their combined min-content to whatever sizes the root. Lumos prefers `overflow: clip`, which is **not** a scroll container, so making that swap on a slider root silently closes a sizing cycle — no error, the browser just resolves at its maximum length. Measured: a grid column at `33,554,406px` and a page `18,755,333px` tall from removing one declaration. Swap `hidden` → `clip` on an element whose children can't shrink and you must add `min-width: 0` back. From Qubes & Co (Swiper on a Webflow Collection List).
+- **Check a rename target isn't reserved by the foundation before handing it to a library** (Output §third-party libraries + Anti-patterns) — a bare `.is-active` is part of the State Manager and flips `--_state---true`/`--_state---false` for the element and everything inside it. Used as a slider's `slideActiveClass` it flips every stateful descendant of the active item only, which is near-undebuggable. The "only `.is-active` for state" rule covers state *you* manage, not a class the library stamps at runtime; namespace it (`is-slide-active`) and treat `.is-current` / `.is-open` the same. From Qubes & Co.
+
 ## 2026-08-05
 
 ### Added
