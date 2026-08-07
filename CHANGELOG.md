@@ -7,6 +7,19 @@ date, changes are grouped as **Added**, **Changed**, **Removed**, or **Fixed**.
 When a change ships, add it under today's date (create the date heading if it's the
 first change of the day).
 
+## 2026-08-07
+
+### Added
+
+- **An exact proportional split between padded items is grid `fr`, not `flex-grow` with `flex-basis: 0`** (Rules §Layout + Anti-patterns) — with `box-sizing: border-box` a flex item can never be narrower than its own padding, so that floor comes out of the pool **before** the grow ratio is applied. Measured: two panels with 40px padding asked for 615:412 came back **600:428**, and `min-width: 0` did not help, because the floor is padding rather than content. `grid-template-columns: minmax(0, 615fr) minmax(0, 412fr)` divides the free space after the gap and knows nothing about item padding. From Qubes & Co (CTA plates).
+- **An explicit `gap` on a `justify-content: space-between` container is a floor, not a spacing** (Rules §Layout + Anti-patterns) — space-between already distributes the leftover; the gap only bites when that leftover is *smaller*, and then it pushes the container past the size the comp fixed. A `space--9` gap over a 31.2px leftover took a 479px panel to 506 and dragged the whole row with it. In a column whose height the design fixes, write no gap. From Qubes & Co.
+- **Paint order among siblings must be stated once any of them is transformed** (Rules §Layout + Anti-patterns) — a `transform` creates a stacking context, so a rotated sibling paints in a later phase than its un-transformed neighbours and lands on top of them regardless of DOM order. In an overlapping card fan that buried the un-rotated card's icon under its neighbour's corner, with nothing in the CSS to point at. If the design stacks in source order, give the un-transformed ones an explicit `z-index`. From Qubes & Co (benefits fan at mobile).
+- **Reserve an out-of-flow child's footprint with `aspect-ratio` on the parent instead of re-forcing the grid** (Rules §Layout + Anti-patterns) — when a design keeps two blocks overlapping at mobile rather than stacking them, the readable build is parent `position: relative` + `aspect-ratio`, child `position: absolute`. `min-height: auto` still applies, so the parent grows if the copy outgrows the ratio — the stack-on-overflow fallback comes free. Re-forcing `display: grid` over the framework's `display: flex !important` collapse means answering an `!important` with another one, which leaves two rules insisting at each other. From Qubes & Co (hero at 390).
+
+### Changed
+
+- **`--duration--default` in `assets/lumos-foundation.css` now reads the override hook** — `var(--default-duration, 0.4s)` instead of a literal `300ms`, so a project can retune every transition by defining `--default-duration` once. This aligns the skill's own asset with the decision already taken on 2026-07-30 and applied to the Fig-2-Web mirror; the two had diverged since, with the skill left on the old literal. ⚠️ **The default moves 300ms → 400ms**, deliberately matching `--nav-duration`. To keep 300ms, change the fallback and leave the hook.
+
 ## 2026-08-06
 
 ### Added

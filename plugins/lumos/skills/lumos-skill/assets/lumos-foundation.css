@@ -649,9 +649,12 @@ label:has(input:focus-visible) [data-outline] {
   --radius--round: 100vw;
   --border-width--main: 0.094rem;
   /* Motion — one shared easing + duration so every transition across a project feels
-     the same. Use as: transition: all var(--duration--default) var(--ease--default); */
+     the same. Use as: transition: all var(--duration--default) var(--ease--default);
+     --duration--default reads an EMPTY override (--default-duration) with a 0.4s fallback:
+     retune every transition project-wide by defining --default-duration once, without
+     editing this token. Same override-hook idiom as --nav--*-duration below. */
   --ease--default: cubic-bezier(0.7, 0, 0.3, 1);
-  --duration--default: 300ms;
+  --duration--default: var(--default-duration, 0.4s);
   --_theme---border: var(--swatch--dark-900-o20);
   --swatch--transparent: transparent;
   --_trigger---on: 1;
