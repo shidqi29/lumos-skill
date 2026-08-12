@@ -1329,7 +1329,7 @@ label:has(input:focus-visible) [data-outline] {
   margin-left: auto;
   margin-right: auto;
   container-type: inline-size;
-  container-name: threshold-large threshold-medium threshold-small;
+  container-name: threshold-large;
 }
 .u-container-small {
   z-index: 1;
@@ -1339,7 +1339,7 @@ label:has(input:focus-visible) [data-outline] {
   margin-left: auto;
   margin-right: auto;
   container-type: inline-size;
-  container-name: threshold-large threshold-medium threshold-small;
+  container-name: threshold-large;
 }
 .u-container-full {
   z-index: 1;
@@ -1349,7 +1349,7 @@ label:has(input:focus-visible) [data-outline] {
   margin-left: auto;
   margin-right: auto;
   container-type: inline-size;
-  container-name: threshold-large threshold-medium threshold-small;
+  container-name: threshold-large;
 }
 
 /* --- Typography scale (references real tokens) --------------------------- */
@@ -2706,10 +2706,31 @@ label:has(input:focus-visible) [data-outline] {
 
 /* --- threshold-* responsive utilities (from the global style) ------------ */
 /* u-container / -small / -full carry container-name: threshold-large
-   threshold-medium threshold-small (inline-size), so @container threshold-*
-   rules react to the container's width (the component's column area, not the
-   page). Most layout lives inside a u-container, so grids collapse as the column
-   area narrows. */
+   (inline-size), so @container threshold-large rules react to the container's
+   width (the component's column area, not the page). Most layout lives inside a
+   u-container, so grids collapse as the column area narrows.
+
+   🔴 ONE NAME, NOT THREE — AND `u-grid-below` DID NOT WORK BEFORE THIS.
+   Until 2026-08-12 these three classes declared `threshold-large
+   threshold-medium threshold-small` together. A container may answer to several
+   names, but it is still ONE container — so all three queries below resolved
+   against the same element, and because the three blocks are identical rule
+   sets the widest matching condition always won:
+
+     .u-grid-above  ->  flex when width < 62em   (< 48em and < 30em are subsets)
+     .u-grid-below  ->  flex when width >= 30em  (>= 48em and >= 62em are subsets)
+
+   Measured on the shipped file, container 1200 / 900 / 700 / 560 / 440px:
+   `u-grid-below` computed `display: flex` at EVERY one of them. It only became
+   a grid below 30em — 440px of container — which no real layout reaches, so in
+   practice the utility never did anything but stack. `u-grid-above` measured
+   identically before and after (grid above 62em, flex below), which is why this
+   went unnoticed: the utility everyone uses was already correct.
+
+   Nothing errors, nothing overflows, and no sweep catches it.
+
+   To use the medium or small thresholds, declare a NESTED container with the
+   u-threshold-medium / u-threshold-small utilities. That is what they are for. */
 
 /* Base grid for u-grid-above / u-grid-below. The utility itself provides the grid,
    gutters, and column direction — components only set the column count (and any gap

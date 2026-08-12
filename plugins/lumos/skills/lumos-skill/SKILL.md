@@ -206,7 +206,19 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
 ```
 
 - `u-section`: `display: flex; flex-flow: column; background-color: var(--_theme---background); color: var(--_theme---text); padding-top/bottom: var(--_spacing---section-space--main)`
-- `u-container`: `max-width: var(--max-width--main); width: calc(100% - var(--site--margin) * 2); margin-inline: auto; flex: 1; container-type: inline-size; container-name: threshold-large threshold-medium threshold-small` — centers and bounds the content width and is the named responsive container (hosts all three thresholds). It has no `display`/`gap` of its own; put layout on the `_layout` child
+- `u-container`: `max-width: var(--max-width--main); width: calc(100% - var(--site--margin) * 2); margin-inline: auto; flex: 1; container-type: inline-size; container-name: threshold-large` — centers and bounds the content width and is the named responsive container. It has no `display`/`gap` of its own; put layout on the `_layout` child
+- **`u-container` carries `flex: 1`, so `justify-content` on the section does nothing.** The container is the section's only flex child and absorbs every spare pixel of the column, so `justify-content: center` on `.[name]_wrap` has nothing left to distribute — the content stays at the top of a container that is simply taller. No error, no overflow, no visual clue the rule was ignored. **To center a section's content vertically, put the flex column on the container instead:**
+  ```css
+  /* WRONG — silently does nothing */
+  .hero_wrap.u-section { justify-content: center; }
+  /* CORRECT */
+  .hero_contain.u-container {
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+  }
+  ```
+  Measured on a real hero: content sat 90px above the comp before, within 4px after. Bites any full-height band — heroes, empty states, centered CTAs
 - **Never apply layout directly on `u-container`** — it has `container-type: inline-size`, so `@container` rules affect its children, not itself. Always use a child `_layout` div:
   ```css
   /* CORRECT — `u-grid-above` on the _layout div supplies the grid; just set the column count */
@@ -276,6 +288,24 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
 - Paragraphs: `u-text-style-large`, `u-text-style-main`, `u-text-style-small`
 - **The text-style collection is capped at 12 modes** (Webflow's per-collection mode limit) — the foundation ships exactly the canonical 12: `display`, `h1`–`h6`, `large`, `medium`, `main`, `small`, `tiny`. Each `u-text-style-*` class becomes one **mode** on a Webflow import, so **never add a 13th**. If a design has more than 12 distinct text sizes, map them onto the 12 canonical names by **pixel size** (biggest→`display`, smallest→`tiny`) — rename, don't add a slot — preserving each size and merging only the least-used near-duplicate. Genuinely off-scale one-offs (an animated counter, a giant stat number) stay as component-CSS `font-size` in `rem`; that creates no mode, so it doesn't count against the 12
 - Tag (`h1`–`h6`) is semantic; utility controls visual size
+- 🔴 **The foundation resets `li { display: block }`, which removes the list-item box — so a list renders with NO marker and `list-style-type` is not the fix.** A block box generates no marker whatever `list-style-*` says, and it also drops the list semantics assistive tech reads. Put `display: list-item` back on the item's own class whenever a list has to show a marker or be announced as a list:
+  ```css
+  .pricing_fare_item { display: list-item; }
+  ```
+  This fails **silently and completely** — no error, no warning, the glyphs are simply nowhere. It bites every CMS rich-text block and every hand-built list
+- 🔴 **A custom list marker must be a `background-image` on the `<li>`, never `list-style-image`.** A marker box is pinned **bottom-edge to the text baseline** and no property moves it, so a 20px glyph on a 24px line sits ~6px above the text's optical centre. Padding inside the SVG does not help either: making the artwork taller shifts the glyph **up** whichever end the blank space is added to, because it is the box's bottom that is pinned (measured against a three-variant fixture — 20×20, 20×26 blank-bottom, 20×26 blank-top). A background is *positioned* rather than aligned, so it can actually be centred:
+  ```css
+  .pricing_fare_item {
+    display: list-item;          /* keep the semantics */
+    list-style-type: none;       /* no UA marker */
+    padding-left: 1.875rem;      /* icon + gap */
+    background-image: url("../assets/check.svg");
+    background-repeat: no-repeat;
+    background-position: left 0.125rem;   /* (line-height − icon) / 2 */
+    background-size: 1.25rem 1.25rem;
+  }
+  ```
+  Wrapped lines then align under the **text** rather than under the icon, because the padding belongs to the item and not to a hanging marker. It is also the more Webflow-native of the two: `list-style-image` is not exposed in the Designer at all, while a background image on "All List Items" plus "List style: None" is — so the rich text stays styleable without custom code
 - Font weight: use `--_typography---font--primary-regular`, `--_typography---font--primary-medium`, or `--_typography---font--primary-bold` — never raw numeric weights like `400`, `500`, `700`
 - Letter spacing: use `--_typography---letter-spacing--tight` (-0.03em) — never raw values like `-0.03em` or `-1px`
 - Space text vertically with `gap` on the flex `_content` (a spacing variable), or `margin-bottom: var(--_text-style---margin-bottom)` on each text element when `_content` is a block
@@ -368,9 +398,13 @@ When generating a full page, see `references/vanilla-mode.md` for the project sk
 
 ### Responsive
 
-**Two systems, split by element.** The container setup is unchanged either way — `u-container` (and `-small`/`-full`) keeps `container-type: inline-size; container-name: threshold-large threshold-medium threshold-small`.
+**Two systems, split by element.** The container setup is unchanged either way — `u-container` (and `-small`/`-full`) keeps `container-type: inline-size; container-name: threshold-large`.
 
 1. **The `u-grid-*` grid system stays breakpointless (container queries).** `u-grid-above` / `u-grid-below` and their threshold companions `u-order-unset-*` / `u-all-unset-*` collapse and reset at the named threshold container queries — `threshold-large` (62em), `threshold-medium` (48em), `threshold-small` (30em) — reacting to the **container's** width. This is the *only* place the breakpointless system is used.
+
+   🔴 **`u-container` carries ONE name — `threshold-large`.** It used to declare all three at once, which reads like "hosts all three thresholds" but is not what a container does: one element answering to three names is still **one container**, so all three queries resolved against it, and since the three threshold blocks are identical rule sets the widest matching condition always won — `u-grid-above` at `< 62em` (making `< 48em` and `< 30em` dead) and `u-grid-below` at `>= 30em` instead of `>= 62em`. Measured at container widths 1200/900/700/560/440px, that left **`u-grid-below` stacked at every one of them** — it never worked. `u-grid-above` was and is correct, which is why nobody noticed. **To use the medium or small threshold, declare a nested container** with `u-threshold-medium` / `u-threshold-small` on an element between the container and the grid. That is what those utilities are for.
+
+   🔴 **Every `u-grid-*` threshold measures its nearest named container — which is normally the PAGE container, not the column the grid sits in.** A two-up pair inside an 8-column form column still collapses on the *page* container's 62em (~1112px of viewport at default margins), long after that column ran out of room for two fields. **A pair that has to collapse on its own width is a wrapping flex row, not a grid** — `flex-flow: wrap` + `flex: 1 1 <basis>` + `min-width: 0` reacts to the space it actually has. Reach for `u-grid-*` when the thing collapsing is a full-width band; reach for wrapping flex when it is a pair inside a column.
 2. **Every other responsive change uses Webflow breakpoints (`@media`).** For anything that isn't the grid collapse — flex-direction, alignment, gap, sizing, show/hide, font-size, position, a non-grid reorder — write a `@media` query in that element's own component CSS at one of Webflow's four breakpoints (desktop-first, `max-width`, px to match Webflow exactly):
 
 | Breakpoint | Media query | Applies |

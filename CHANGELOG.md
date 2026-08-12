@@ -7,6 +7,27 @@ date, changes are grouped as **Added**, **Changed**, **Removed**, or **Fixed**.
 When a change ships, add it under today's date (create the date heading if it's the
 first change of the day).
 
+## 2026-08-12
+
+### Fixed
+
+- 🔴 **`u-container` / `-small` / `-full` now carry ONE container name (`threshold-large`) instead of all three** (`assets/lumos-foundation.css`). Declaring `threshold-large threshold-medium threshold-small` together reads like "hosts all three thresholds", but an element answering to several names is still **one container** — so all three `@container` queries resolved against the same box, and because the three threshold blocks are **identical rule sets** the widest matching condition always won:
+  - `.u-grid-above` → flex when `width < 62em`, making `< 48em` and `< 30em` dead code;
+  - `.u-grid-below` → flex when `width >= 30em` instead of `>= 62em`.
+
+  **Measured, not inferred — and `u-grid-below` was worse than "wrong breakpoint": it never worked at all.** Probing the shipped file at container widths 1200 / 900 / 700 / 560 / 440px, `u-grid-below` computed `display: flex` at **every one of them**; it only becomes a grid below 30em (440px of container), which no real layout reaches. After the fix it is a grid below 62em and stacked above it, which is what the name means. `u-grid-above` measures **identically before and after** (grid above 62em, flex below) — which is exactly why this survived: the utility everyone actually uses was already correct.
+
+  So `threshold-medium` and `threshold-small` were unreachable on a `u-container`. Nothing errors, nothing overflows, no sweep catches it. **To use the medium or small threshold, declare a nested container with the `u-threshold-medium` / `u-threshold-small` utilities — that is what they are for.**
+
+  ⚠️ **Breaking in two narrow ways.** (1) Any component that wrote `@container threshold-medium|small` expecting it to resolve against `u-container` — those rules now match no container and never apply; move them to `threshold-large` at the width they actually meant, or add the matching `u-threshold-*` utility to a wrapper between the container and the element. (2) Anything that had `u-grid-below` on it now genuinely becomes a grid below 62em, where before it was always stacked — check those layouts. Existing projects pin their skill version and are unaffected until they re-sync. From GTM-24.
+
+### Added
+
+- 🔴 **`u-container` carries `flex: 1`, so `justify-content` on the section does nothing** (Rules §Sections & Containers). The container is the section's only flex child and absorbs every spare pixel of the column, so `justify-content: center` on `.[name]_wrap` has nothing left to distribute — the content stays at the top of a container that is simply taller, with no error and no visual clue the rule was ignored. Vertical centring goes on the **container**: `display: flex; flex-flow: column; justify-content: center`. Measured on a real hero: content sat 90px above the comp before, within 4px after. Bites any full-height band. From GTM-24 (three separate heroes).
+- 🔴 **The foundation's `li { display: block }` removes the list-item box, so a list renders with NO marker — and `list-style-type` is not the fix** (Rules §Typography). A block box generates no marker whatever `list-style-*` says, and it drops the list semantics assistive tech reads. Put `display: list-item` back on the item's own class. **Fails silently and completely**: no error, no warning, the glyphs are simply nowhere. From GTM-24, and it bites every CMS rich-text block.
+- 🔴 **A custom list marker must be a `background-image` on the `<li>`, never `list-style-image`** (Rules §Typography). A marker box is pinned **bottom-edge to the text baseline** and no property moves it, so a 20px glyph on a 24px line sits ~6px above the text's optical centre. Padding inside the SVG does not help: making the artwork taller shifts the glyph **up** whichever end the blank is added to, because it is the box's bottom that is pinned — measured against a three-variant fixture (20×20, 20×26 blank-bottom, 20×26 blank-top → item heights 27 / 33 / 33). A background is *positioned* rather than aligned, so it can be centred at `(line-height − icon) / 2`; wrapped lines then align under the **text** rather than under the icon. Also the more Webflow-native of the two — `list-style-image` is not exposed in the Designer, a background on "All List Items" plus "List style: None" is. From GTM-24.
+- **Every `u-grid-*` threshold measures its nearest named container, which is normally the PAGE container — not the column the grid sits in** (Rules §Responsive). A two-up pair inside an 8-column form column still collapses on the page container's 62em (~1112px of viewport at default margins), long after that column ran out of room for two fields. **A pair that has to collapse on its own width is a wrapping flex row, not a grid**: `flex-flow: wrap` + `flex: 1 1 <basis>` + `min-width: 0`. Reach for `u-grid-*` when the thing collapsing is a full-width band. From GTM-24 (Contact and Schnellanfrage forms).
+
 ## 2026-08-07
 
 ### Added
